@@ -10,6 +10,11 @@ const Home = () => {
   const [date, setDate] = useState("3/2/26");
   const [completed, setCompleted] = useState(0);
   const [total, setTotal] = useState(5);
+  const [task1, setTask1] = useState(false);
+  const [task2, setTask2] = useState(false);
+  const [task3, setTask3] = useState(false);
+  const [task4, setTask4] = useState(false);
+  const [task5, setTask5] = useState(false);
 
   return (
     <View style={styles.container}>
@@ -35,11 +40,26 @@ const Home = () => {
         </View>
         <View style={styles.taskContainer}>
           <Text style={styles.taskTitle}>Today's Tasks:</Text>
-          <Text style={styles.task}>Task 1</Text>
-          <Text style={styles.task}>Task 2</Text>
-          <Text style={styles.task}>Task 3</Text>
-          <Text style={styles.task}>Task 4</Text>
-          <Text style={styles.task}>Task 5</Text>
+          <View style={styles.fullTask}>
+            <Checkbox value={task1} onValueChange={setTask1}/>
+            <Text style={styles.task}>Task 1</Text>
+          </View>
+          <View style={styles.fullTask}>
+            <Checkbox value={task2} onValueChange={setTask2}/>
+            <Text style={styles.task}>Task 2</Text>
+          </View>
+          <View style={styles.fullTask}>
+            <Checkbox value={task3} onValueChange={setTask3}/>
+            <Text style={styles.task}>Task 3</Text>
+          </View>
+          <View style={styles.fullTask}>
+            <Checkbox value={task4} onValueChange={setTask4}/>
+            <Text style={styles.task}>Task 4</Text>
+          </View>
+          <View style={styles.fullTask}>
+            <Checkbox value={task5} onValueChange={setTask5}/>
+            <Text style={styles.task}>Task 5</Text>
+          </View>
         </View>
       </View>
     </View>
@@ -106,12 +126,17 @@ const styles = StyleSheet.create({
   },
   taskTitle: {
     marginTop: 20,
+    marginBottom: 15,
     borderStyle: 'dotted',
     borderBottomWidth: 2,
     borderBottomColor: 'black',
     alignSelf: 'flex-start',
   },
+  fullTask: {
+    flexDirection: 'row',
+    marginTop: 20,
+  },
   task: {
-    marginTop: 10,
+    marginLeft: 10,
   },
 });
