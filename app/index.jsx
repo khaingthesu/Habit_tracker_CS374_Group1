@@ -31,7 +31,7 @@ const Home = () => {
       <View style={styles.body}>
         <View style={styles.infoContainer}>
           <Text style={styles.date}>{date}</Text>
-          <Text style={styles.progress}>{completed} / {total}</Text>
+          <Text style={styles.progress}>Progress: {completed} / {total}</Text>
         </View>
         <View style={styles.mainPicContainer}>
           <Image
