@@ -1,6 +1,6 @@
 {
   "expo": {
-    "scheme":"habittracker",
+    "scheme": "habittracker",
     "name": "HabitTracker",
     "slug": "HabitTracker",
     "version": "1.0.0",
@@ -25,6 +25,9 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "plugins": [
+      "expo-router"
+    ]
   }
 }
