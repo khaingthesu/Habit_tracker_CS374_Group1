@@ -7,6 +7,7 @@ let deviceWidth = Dimensions.get('window').width;
 
 const Home = () => {
   /* use the set functions later when changing */
+  /* gotta use useState instead of state = {}, since not class component like codehs, but a function component like the vid examples */
   const [date, setDate] = useState("3/2/26");
   const [completed, setCompleted] = useState(0);
   const [total, setTotal] = useState(5);
@@ -39,25 +40,25 @@ const Home = () => {
           />
         </View>
         <View style={styles.taskContainer}>
-          <Text style={styles.taskTitle}>Today's Tasks:</Text>
+          <Text style={styles.taskTitle}>Today's Tasks:</Text> {/* somehow dynamically change later, idk how though */}
           <View style={styles.fullTask}>
-            <Checkbox value={task1} onValueChange={setTask1}/>
+            <Checkbox value={task1} onValueChange={value => {setTask1(value);}}/>
             <Text style={styles.task}>Task 1</Text>
           </View>
           <View style={styles.fullTask}>
-            <Checkbox value={task2} onValueChange={setTask2}/>
+            <Checkbox value={task2} onValueChange={value => {setTask2(value);}}/>
             <Text style={styles.task}>Task 2</Text>
           </View>
           <View style={styles.fullTask}>
-            <Checkbox value={task3} onValueChange={setTask3}/>
+            <Checkbox value={task3} onValueChange={value => {setTask3(value);}}/>
             <Text style={styles.task}>Task 3</Text>
           </View>
           <View style={styles.fullTask}>
-            <Checkbox value={task4} onValueChange={setTask4}/>
+            <Checkbox value={task4} onValueChange={value => {setTask4(value);}}/>
             <Text style={styles.task}>Task 4</Text>
           </View>
           <View style={styles.fullTask}>
-            <Checkbox value={task5} onValueChange={setTask5}/>
+            <Checkbox value={task5} onValueChange={value => {setTask5(value);}}/>
             <Text style={styles.task}>Task 5</Text>
           </View>
         </View>
