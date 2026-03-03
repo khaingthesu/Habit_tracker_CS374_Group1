@@ -35,7 +35,7 @@ const Home = () => {
         </View>
         <View style={styles.mainPicContainer}>
           <Image
-              source={{ uri: 'https://picsum.photos/id/1/200/400/?blur' } /* Replace with something */}
+              source={{ uri: 'https://picsum.photos/id/1/200/400/?blur' } /* Replace with something related to tracking habits? */}
               style={styles.mainPic}
           />
         </View>
@@ -75,14 +75,14 @@ const styles = StyleSheet.create({
   },
   header: {
     flex: 1.5,
-    backgroundColor: 'lightblue',
+    backgroundColor: 'teal',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
   },
   body: {
     flex: 10,
-    backgroundColor: 'tan',
+    backgroundColor: '#E6E6FA',
   },
   title: {
     fontWeight: 'bold',
@@ -97,20 +97,23 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   infoContainer: {
-    backgroundColor: 'red',
+    backgroundColor: '#E6E6FA',
     flex: 1,
   },
   mainPicContainer: {
-    backgroundColor: 'cyan',
+    backgroundColor: '#E6E6FA',
     justifyContent: 'center',
     alignItems: 'center',
   },
   mainPic: {
     width: 400,
     height: 200,
+    borderRadius: 5,
+    borderWidth: 2,
+    borderColor: 'black',
   },
   taskContainer: {
-    backgroundColor: 'orange',
+    backgroundColor: '#E6E6FA',
     flex: 4,
     marginLeft: 20,
   },
