@@ -1,5 +1,6 @@
 import { StyleSheet, Text, View, Dimensions, TouchableHighlight, Image } from 'react-native'
 import React, { useState } from 'react'
+import Checkbox from 'expo-checkbox' /* use the command npx expo install expo-checkbox */
 
 let deviceHeight = Dimensions.get('window').height;
 let deviceWidth = Dimensions.get('window').width;
@@ -33,7 +34,12 @@ const Home = () => {
           />
         </View>
         <View style={styles.taskContainer}>
-
+          <Text style={styles.taskTitle}>Today's Tasks:</Text>
+          <Text style={styles.task}>Task 1</Text>
+          <Text style={styles.task}>Task 2</Text>
+          <Text style={styles.task}>Task 3</Text>
+          <Text style={styles.task}>Task 4</Text>
+          <Text style={styles.task}>Task 5</Text>
         </View>
       </View>
     </View>
@@ -85,6 +91,7 @@ const styles = StyleSheet.create({
   taskContainer: {
     backgroundColor: 'orange',
     flex: 4,
+    marginLeft: 20,
   },
   date: {
     fontWeight: 'bold',
@@ -96,5 +103,15 @@ const styles = StyleSheet.create({
     marginLeft: 50,
     marginBottom: 8,
     fontSize: 20,
+  },
+  taskTitle: {
+    marginTop: 20,
+    borderStyle: 'dotted',
+    borderBottomWidth: 2,
+    borderBottomColor: 'black',
+    alignSelf: 'flex-start',
+  },
+  task: {
+    marginTop: 10,
   },
 });
