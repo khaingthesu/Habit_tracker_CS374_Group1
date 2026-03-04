@@ -1,147 +1,191 @@
-import { StyleSheet, Text, View, Dimensions, TouchableHighlight, Image } from 'react-native'
-import React, { useState } from 'react'
-import Checkbox from 'expo-checkbox'
-import {Link} from 'expo-router' /* use the command npx expo install expo-checkbox */
+import { Link } from 'expo-router';
+import { useState } from "react";
+import { Dimensions, Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import Logo from "../assets/logo.png";
 
-let deviceHeight = Dimensions.get('window').height;
-let deviceWidth = Dimensions.get('window').width;
+const deviceWidth = Dimensions.get("window").width;
+const deviceHeight = Dimensions.get("window").height;
+const LoginScreen = () => {
+const [email, setEmail] = useState("");
+const [password, setPassword] = useState("");
 
-const Home = () => {
-  /* use the set functions later when changing */
-  /* gotta use useState instead of state = {}, since not class component like codehs, but a function component like the vid examples */
-  const [date, setDate] = useState("3/2/26");
-  const [completed, setCompleted] = useState(0);
-  const [total, setTotal] = useState(5);
-  const [task1, setTask1] = useState(false);
-  const [task2, setTask2] = useState(false);
-  const [task3, setTask3] = useState(false);
-  const [task4, setTask4] = useState(false);
-  const [task5, setTask5] = useState(false);
+
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Habit Tracker</Text> 
-          <TouchableHighlight onPress={() => alert('Logo pressed - redirect somewhere (profile?)')}>
-            <Image
-                source={{ uri: 'https://picsum.photos/id/237/200/300' } /* Replace image with logo later */}
-                style={styles.logo}
-            />
-          </TouchableHighlight>
-      </View>
-      <View style={styles.body}>
-        <View style={styles.infoContainer}>
-          <Text style={styles.date}>{date}</Text>
-          <Text style={styles.progress}>Progress: {completed} / {total}</Text>
-        </View>
-        <View style={styles.mainPicContainer}>
-          <Image
-              source={{ uri: 'https://picsum.photos/id/1/200/400/?blur' } /* Replace with something related to tracking habits? */}
-              style={styles.mainPic}
-          />
-        </View>
-        <View style={styles.taskContainer}>
-          <Text style={styles.taskTitle}>Today's Tasks:</Text> {/* somehow dynamically change later, idk how though */}
-          <View style={styles.fullTask}>
-            <Checkbox value={task1} onValueChange={value => {setTask1(value);}}/>
-            <Text style={styles.task}>Task 1</Text>
-          </View>
-          <View style={styles.fullTask}>
-            <Checkbox value={task2} onValueChange={value => {setTask2(value);}}/>
-            <Text style={styles.task}>Task 2</Text>
-          </View>
-          <View style={styles.fullTask}>
-            <Checkbox value={task3} onValueChange={value => {setTask3(value);}}/>
-            <Text style={styles.task}>Task 3</Text>
-          </View>
-          <View style={styles.fullTask}>
-            <Checkbox value={task4} onValueChange={value => {setTask4(value);}}/>
-            <Text style={styles.task}>Task 4</Text>
-          </View>
-          <View style={styles.fullTask}>
-            <Checkbox value={task5} onValueChange={value => {setTask5(value);}}/>
-            <Text style={styles.task}>Task 5</Text>
-          </View>
-        </View>
-      </View>
-    </View>
-  )
-}
 
-export default Home
+    <View style={styles.topBar}>
+        <Image source={Logo} style={styles.logoIcon} />
+        <View style={styles.logoBox}>
+            
+            <Text style={styles.logoSubtitle}>Build better days, one habit at a time.</Text>
+        </View>
+    </View>
+
+
+
+      {/* Form */}
+      <View style={styles.form}>
+        <Text style={styles.label}>Email</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="you@example.com"
+          placeholderTextColor="#bbb"
+          keyboardType="email-address"
+          autoCapitalize="none"
+          value={email}
+          onChangeText={setEmail}
+        />
+
+        <Text style={styles.label}>Password</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Enter your password"
+          placeholderTextColor="#bbb"
+          secureTextEntry
+          value={password}
+          onChangeText={setPassword}
+        />
+
+        <TouchableOpacity>
+          <Text style={styles.forgot}>Forgot password?</Text>
+        </TouchableOpacity>
+
+        <Link href="/home" asChild>
+          <TouchableOpacity style={styles.loginBtn}>
+            <Text style={styles.loginBtnText}>Log In</Text>
+          </TouchableOpacity>
+        </Link>
+      </View>
+
+      {/* Footer */}
+      <View style={styles.footer}>
+        <View style={styles.divider} />
+        <View style={styles.signupRow}>
+          <Text style={styles.footerText}>Don't have an account? </Text>
+          <Link href="/signup">
+            <Text style={styles.signupLink}>Sign Up</Text>
+          </Link>
+        </View>
+      </View>
+
+    </View>
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    width: deviceWidth,
+    height: deviceHeight,
+    backgroundColor: "#ffffff",
+    justifyContent: "flex-start",
+    alignItems: "center",
+    paddingHorizontal: 28,
+paddingTop: 10,
   },
-  header: {
+header: {
     flex: 1.5,
     backgroundColor: 'teal',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  body: {
-    flex: 10,
-    backgroundColor: '#E6E6FA',
+topBar:{
+
+justifyContent: 'flex-start',
+alignItems: 'center',
+},
+
+  logoBox: {
+    alignItems: "center",
+    marginBottom: 40,
   },
-  title: {
-    fontWeight: 'bold',
-    fontSize: deviceHeight / 40,
-    marginLeft: 20,
+  logoIcon: {
+    height: 100,
+    width: 100,
+marginBottom: 20,
   },
-  logo: {
-    height: 80,
-    width: 80,
-    marginLeft: 'auto',
-    marginRight: 20,
+  logoTitle: {
+    fontSize: 32,
+    fontWeight: "700",
+    color: "#111",
+    letterSpacing: -0.5,
+    marginBottom: 6,
+  },
+  logoSubtitle: {
+    fontSize: 13,
+    color: "#999",
+    textAlign: "center",
+  },
+  form: {
+    width: "100%",
+    marginBottom: 24,
+  },
+  label: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#444",
+    marginBottom: 6,
+    marginTop: 14,
+  },
+  input: {
+    width: "100%",
+    borderWidth: 1,
+    borderColor: "#e5e5e5",
     borderRadius: 10,
+    paddingVertical: 13,
+    paddingHorizontal: 14,
+    fontSize: 15,
+    color: "#111",
+    backgroundColor: "#fafafa",
   },
-  infoContainer: {
-    backgroundColor: '#E6E6FA',
-    flex: 1,
+  forgot: {
+    color: "#4f8ef7",
+    fontSize: 13,
+    textAlign: "right",
+    marginTop: 8,
+    marginBottom: 20,
   },
-  mainPicContainer: {
-    backgroundColor: '#E6E6FA',
-    justifyContent: 'center',
-    alignItems: 'center',
+  loginBtn: {
+    width: "100%",
+    backgroundColor: "#111",
+    borderRadius: 10,
+    paddingVertical: 14,
+    alignItems: "center",
   },
-  mainPic: {
-    width: 400,
-    height: 200,
-    borderRadius: 5,
-    borderWidth: 2,
-    borderColor: 'black',
+  loginBtnText: {
+    color: "#fff",
+    fontSize: 15,
+    fontWeight: "700",
+    letterSpacing: 0.3,
   },
-  taskContainer: {
-    backgroundColor: '#E6E6FA',
-    flex: 4,
-    marginLeft: 20,
+  footer: {
+    width: "100%",
+    alignItems: "center",
+    position: "absolute",
+    bottom: 0,
   },
-  date: {
-    fontWeight: 'bold',
-    fontSize: 24,
-    marginTop: 15,
-    marginLeft: 50,
+  divider: {
+    width: "100%",
+    height: 1,
+    backgroundColor: "#ebebeb",
+    marginBottom: 16,
   },
-  progress: {
-    marginLeft: 50,
-    marginBottom: 8,
-    fontSize: 20,
+  signupRow: {
+    flexDirection: "row",
+    marginBottom: 28,
   },
-  taskTitle: {
-    marginTop: 20,
-    marginBottom: 15,
-    borderStyle: 'dotted',
-    borderBottomWidth: 2,
-    borderBottomColor: 'black',
-    alignSelf: 'flex-start',
+  footerText: {
+    color: "#888",
+    fontSize: 14,
   },
-  fullTask: {
-    flexDirection: 'row',
-    marginTop: 20,
-  },
-  task: {
-    marginLeft: 10,
+  signupLink: {
+    color: "#4f8ef7",
+    fontSize: 14,
+    fontWeight: "600",
   },
 });
+
+export default LoginScreen;
+
+
