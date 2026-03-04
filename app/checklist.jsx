@@ -201,7 +201,7 @@ const styles = StyleSheet.create({
 //Task boxes
   box1:{
     height: deviceHeight/4,
-    width: deviceWidth/3,
+    width: deviceWidth/1.5,
 
     borderWidth: 3,
     borderColor: 'red',
@@ -212,6 +212,7 @@ const styles = StyleSheet.create({
     backgroundColor:'red',
     padding: 15,
     flexDirection: 'row',
+    alignItems: 'center',
   },
 
   boxTitleText:{
@@ -221,15 +222,15 @@ const styles = StyleSheet.create({
   },
 
   taskInput:{
-    width:200,
-    height: 10,
+    width:150,
+    height: 50,
     backgroundColor:'white',
 
     borderWidth: 2.2,
     borderRadius: 20,
 
-    padding: 15,
-    marginLeft: 180,
+    padding: 10,
+    marginLeft: 18,
   },
 
   boxImage:{
@@ -245,7 +246,7 @@ const styles = StyleSheet.create({
 
   box2:{
     height: deviceHeight/4,
-    width: deviceWidth/3,
+    width: deviceWidth/1.5,
 
     borderWidth: 3,
     borderColor: 'green',
@@ -255,6 +256,7 @@ const styles = StyleSheet.create({
     backgroundColor:'green',
     padding: 15,
     flexDirection: 'row',
+    alignItems: 'center',
   },
 
   //Boxes list of tasks
