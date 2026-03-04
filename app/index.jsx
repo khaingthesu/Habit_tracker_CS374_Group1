@@ -21,9 +21,6 @@ const Home = () => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Link href="/checklist" style={styles.checklist}>
-          TEMPORAL CHECKLIST ACCESS
-        </Link>
         <Text style={styles.title}>Habit Tracker</Text> 
           <TouchableHighlight onPress={() => alert('Logo pressed - redirect somewhere (profile?)')}>
             <Image
