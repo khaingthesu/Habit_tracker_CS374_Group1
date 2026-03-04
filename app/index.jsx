@@ -75,6 +75,7 @@ const styles = StyleSheet.create({
   },
   header: {
     flex: 1.5,
+    paddingTop: 10,
     backgroundColor: 'teal',
     flexDirection: 'row',
     alignItems: 'center',
