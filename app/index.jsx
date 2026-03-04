@@ -1,6 +1,7 @@
 import { StyleSheet, Text, View, Dimensions, TouchableHighlight, Image } from 'react-native'
 import React, { useState } from 'react'
-import Checkbox from 'expo-checkbox' /* use the command npx expo install expo-checkbox */
+import Checkbox from 'expo-checkbox'
+import {Link} from 'expo-router' /* use the command npx expo install expo-checkbox */
 
 let deviceHeight = Dimensions.get('window').height;
 let deviceWidth = Dimensions.get('window').width;
@@ -20,6 +21,9 @@ const Home = () => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
+        <Link href="/checklist" style={styles.checklist}>
+          TEMPORAL CHECKLIST ACCESS
+        </Link>
         <Text style={styles.title}>Habit Tracker</Text> 
           <TouchableHighlight onPress={() => alert('Logo pressed - redirect somewhere (profile?)')}>
             <Image
