@@ -1,6 +1,7 @@
 import { StyleSheet, Text, View, Dimensions, TouchableHighlight, Image } from 'react-native'
 import React, { useState } from 'react'
 import Checkbox from 'expo-checkbox' /* use the command npx expo install expo-checkbox */
+import { Link } from 'expo-router'; /* for temp link to checklist */
 
 let deviceHeight = Dimensions.get('window').height;
 let deviceWidth = Dimensions.get('window').width;
@@ -61,6 +62,7 @@ const Home = () => {
             <Checkbox value={task5} onValueChange={value => {setTask5(value);}}/>
             <Text style={styles.task}>Task 5</Text>
           </View>
+          <Link href="/checklist" style={styles.link}>Checklist Page</Link>
         </View>
       </View>
     </View>
@@ -142,5 +144,12 @@ const styles = StyleSheet.create({
   },
   task: {
     marginLeft: 10,
+  },
+  link: {
+    marginTop: 20,
+    color: 'blue',
+    borderBottomWidth: 2,
+    alignSelf: 'flex-start',
+    borderBottomColor: 'blue',
   },
 });
