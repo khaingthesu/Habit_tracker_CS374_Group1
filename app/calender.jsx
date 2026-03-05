@@ -1,41 +1,45 @@
+import React, { useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { Calendar } from "react-native-calendars";
-import { useState } from "react";
 
 export default function CalendarPage() {
+  const [markedDates, setMarkedDates] = useState({});
 
-  const [selectedDays, setSelectedDays] = useState({});
-
-  const handleDayPress = (day) => {
+  function onDayPress(day) {
     const date = day.dateString;
 
-    setSelectedDays((prev) => {
-      const updated = { ...prev };
+    setMarkedDates((prev) => {
+      const copy = { ...prev };
 
-      if (updated[date]) {
-        delete updated[date];
+      
+      if (copy[date]) {
+        delete copy[date];
       } else {
-        updated[date] = { selected: true, selectedColor: "#6C63FF" };
+        copy[date] = { selected: true, selectedColor: "teal" };
       }
 
-      return updated;
+      return copy;
     });
-  };
+  }
 
   return (
     <View style={styles.container}>
+      <Text style={styles.title}>Calendar</Text>
 
-      <Text style={styles.title}>Habit Calendar</Text>
+      <View style={styles.calendarBox}>
+        <Calendar
+          onDayPress={onDayPress}
+          markedDates={markedDates}
+          theme={{
+            todayTextColor: "teal",
+            arrowColor: "teal",
+            textDayFontWeight: "500",
+            textMonthFontWeight: "bold",
+          }}
+        />
+      </View>
 
-      <Calendar
-        markedDates={selectedDays}
-        onDayPress={handleDayPress}
-        theme={{
-          todayTextColor: "#6C63FF",
-          arrowColor: "#6C63FF",
-        }}
-      />
-
+      <Text style={styles.note}>Tap a day to mark it done.</Text>
     </View>
   );
 }
@@ -43,13 +47,26 @@ export default function CalendarPage() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: "#E6E6FA",
     paddingTop: 60,
-    backgroundColor: "#fff",
+    paddingHorizontal: 15,
   },
   title: {
-    fontSize: 24,
-    fontWeight: "600",
+    fontSize: 28,
+    fontWeight: "bold",
     textAlign: "center",
-    marginBottom: 20,
+    marginBottom: 15,
+  },
+  calendarBox: {
+    backgroundColor: "white",
+    padding: 10,
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: "black",
+  },
+  note: {
+    marginTop: 15,
+    textAlign: "center",
+    fontSize: 14,
   },
 });
