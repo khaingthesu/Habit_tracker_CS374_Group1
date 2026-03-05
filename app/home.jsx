@@ -63,6 +63,7 @@ const Home = () => {
             <Text style={styles.task}>Task 5</Text>
           </View>
           <Link href="/checklist" style={styles.link}>Checklist Page</Link>
+          <Link href="/calendar" style={styles.link}>Calendar Page</Link>
         </View>
       </View>
     </View>
