@@ -2,14 +2,13 @@ import { Link } from 'expo-router';
 import { useState } from "react";
 import { Alert, Dimensions, Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import Logo from "../assets/logo.png";
-
+// Get device dimensions for responsive design
 const deviceWidth = Dimensions.get("window").width;
 const deviceHeight = Dimensions.get("window").height;
+// Login Screen Component
 const LoginScreen = () => {
 const [email, setEmail] = useState("");
 const [password, setPassword] = useState("");
-
-
 
   return (
     <View style={styles.container}>
@@ -21,7 +20,6 @@ const [password, setPassword] = useState("");
             <Text style={styles.logoSubtitle}>Build better days, one habit at a time.</Text>
         </View>
     </View>
-
 
 
       {/* Form */}
@@ -56,10 +54,9 @@ const [password, setPassword] = useState("");
             onPress={() => {
             if (email || password) {
             Alert.alert("Missing Fields", "Please enter your email and password.");
-return;
-        }
-            }}
-    >
+                return;
+                }}}
+            >
             <Text style={styles.loginBtnText}>Log In</Text>
           </TouchableOpacity>
         </Link>
@@ -70,7 +67,7 @@ return;
         <View style={styles.divider} />
         <View style={styles.signupRow}>
           <Text style={styles.footerText}>Don't have an account? </Text>
-          <Link href="/signup">
+          <Link href="/signup" asChild>
             <Text style={styles.signupLink}>Sign Up</Text>
           </Link>
         </View>
@@ -88,7 +85,7 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
     alignItems: "center",
     paddingHorizontal: 28,
-paddingTop: 10,
+    paddingTop: 10,
   },
 header: {
     flex: 1.5,
@@ -98,27 +95,20 @@ header: {
     justifyContent: 'space-between',
   },
 topBar:{
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    },
 
-justifyContent: 'flex-start',
-alignItems: 'center',
-},
-
-  logoBox: {
+logoBox: {
     alignItems: "center",
     marginBottom: 40,
   },
   logoIcon: {
     height: 100,
     width: 100,
-marginBottom: 20,
+    marginBottom: 20,
   },
-  logoTitle: {
-    fontSize: 32,
-    fontWeight: "700",
-    color: "#111",
-    letterSpacing: -0.5,
-    marginBottom: 6,
-  },
+  
   logoSubtitle: {
     fontSize: 13,
     color: "#999",
