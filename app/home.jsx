@@ -2,9 +2,10 @@ import { StyleSheet, Text, View, Dimensions, TouchableHighlight, Image } from 'r
 import React, { useState } from 'react'
 import Checkbox from 'expo-checkbox' /* use the command npx expo install expo-checkbox */
 import { Link } from 'expo-router'; /* for temp link to checklist */
-
+import { Scrollbar } from 'react-scrollbars-custom';
 let deviceHeight = Dimensions.get('window').height;
 let deviceWidth = Dimensions.get('window').width;
+
 
 const Home = () => {
   /* use the set functions later when changing */
@@ -40,8 +41,16 @@ const Home = () => {
               style={styles.mainPic}
           />
         </View>
+      
+
+       <View style={styles.lowerpart}> 
         <View style={styles.taskContainer}>
+
+  
+
+    
           <Text style={styles.taskTitle}>Today's Tasks:</Text> {/* somehow dynamically change later, idk how though */}
+                 <Scrollbar style={styles.tscroll}>
           <View style={styles.fullTask}>
             <Checkbox value={task1} onValueChange={value => {setTask1(value);}}/>
             <Text style={styles.task}>Task 1</Text>
@@ -62,10 +71,13 @@ const Home = () => {
             <Checkbox value={task5} onValueChange={value => {setTask5(value);}}/>
             <Text style={styles.task}>Task 5</Text>
           </View>
+                </Scrollbar>
+                {/*Would these be better in a footer */}
           <Link href="/checklist" style={styles.link}>Checklist Page</Link>
           <Link href="/calendar" style={styles.link}>Calendar Page</Link>
         </View>
       </View>
+</View>
     </View>
   )
 }
@@ -76,6 +88,16 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  tscroll:{
+    alignItems: 'center',
+    height: deviceHeight / 5,
+    Width:  deviceWidth/ 5,
+   
+
+
+ },
+
+ 
   header: {
     flex: 1.5,
     backgroundColor: 'teal',
@@ -86,6 +108,15 @@ const styles = StyleSheet.create({
   body: {
     flex: 10,
     backgroundColor: '#E6E6FA',
+  },
+  fullTask:{
+      flexDirection: 'row',
+    backgroundColor: '#fef2bf',
+     borderStyle: 'dotted',
+    width: deviceHeight / 10,
+    margin: deviceHeight/100,
+    borderBottomWidth: deviceHeight / 200,
+
   },
   title: {
     fontWeight: 'bold',
@@ -100,6 +131,8 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   infoContainer: {
+      alignItems: 'center',
+
     backgroundColor: '#E6E6FA',
     flex: 1,
   },
@@ -108,21 +141,29 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  lowerpart:{
+ backgroundColor: '#fef2bf',
+  },
   mainPic: {
-    width: 400,
-    height: 200,
+    
+      marginBottom: deviceHeight/50,
+    width: deviceWidth/4,
+    height: deviceHeight/4,
     borderRadius: 5,
     borderWidth: 2,
     borderColor: 'black',
   },
   taskContainer: {
-    backgroundColor: '#E6E6FA',
-    flex: 4,
-    marginLeft: 20,
+  
+    marginLeft: deviceWidth/2.2,
+    width: deviceWidth,
+    height: deviceHeight/2,
+    
+   
   },
   date: {
     fontWeight: 'bold',
-    fontSize: 24,
+  fontSize: deviceHeight / 40,
     marginTop: 15,
     marginLeft: 50,
   },
@@ -132,18 +173,17 @@ const styles = StyleSheet.create({
     fontSize: 20,
   },
   taskTitle: {
-    marginTop: 20,
-    marginBottom: 15,
-    borderStyle: 'dotted',
-    borderBottomWidth: 2,
-    borderBottomColor: 'black',
-    alignSelf: 'flex-start',
+
+     right: deviceWidth/20,
+    backgroundColor: '#fef2bf',
+     fontSize: deviceHeight / 40,
+    width: deviceHeight / 6,
+    margin: deviceHeight/100,
+    borderBottomWidth: deviceHeight / 200,
   },
-  fullTask: {
-    flexDirection: 'row',
-    marginTop: 20,
-  },
+  
   task: {
+    fontSize: deviceHeight / 50,
     marginLeft: 10,
   },
   link: {
