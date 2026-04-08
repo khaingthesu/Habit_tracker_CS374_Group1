@@ -1,14 +1,44 @@
-import { Link } from 'expo-router';
+import { Link, useRouter } from 'expo-router';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { doc, serverTimestamp, setDoc } from 'firebase/firestore';
 import { useState } from "react";
 import { Alert, Dimensions, StyleSheet, Text, TextInput, TouchableHighlight, View } from "react-native";
+import { auth, db } from '../../firebase';
+
 
 // Get device dimensions for responsive design
 const deviceWidth = Dimensions.get("window").width;
 const deviceHeight = Dimensions.get("window").height;
-// Login Screen Component
+// SignUp Screen Component
 const SignupScreen = () => {
-const [email, setEmail] = useState("");
-const [password, setPassword] = useState("");
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+
+
+// Initialize router for navigation
+const router = useRouter();
+// Handle user signup
+const handleSignup = async () => {
+        if (!email || !password) {
+            Alert.alert("Missing Fields", "Please enter your email and password.");
+            return;
+        }
+
+    try {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+            await setDoc
+                (doc(db, "users", userCredential.user.uid),
+                {email: userCredential.user.email,
+                createdAt: serverTimestamp()}
+                );
+            Alert.alert("Success", "Account created! Please log in.");
+            router.replace("/login");
+            }
+    catch (error) {
+        Alert.alert("Signup Error", error.message);
+    }
+};
+
 
   return (
     <View style={styles.container}>
@@ -38,17 +68,12 @@ const [password, setPassword] = useState("");
                   onChangeText={setPassword} />
 
 
-        <Link href="/home" asChild>
+        
           <TouchableHighlight style={styles.loginBtn}
-            onPress={() => {
-            if (email || password) {
-            Alert.alert("Missing Fields", "Please enter your email and password.");
-                return;
-                }}}
-            >
+            onPress={handleSignup}>
             <Text style={styles.loginBtnText}>Sign Up</Text>
           </TouchableHighlight>
-        </Link>
+    
       </View><View style={styles.footer}>
               <View style={styles.divider} />
               <View style={styles.signupRow}>
