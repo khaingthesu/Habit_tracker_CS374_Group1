@@ -54,7 +54,13 @@ export default class checklist extends Component{
             </TouchableHighlight>
           </View>
         </View>
+        
+   <view style={styles.vspacers}></view>
 
+
+<view style={styles.spacers}></view>
+<view style={styles.vspacersr}></view>  
+<view style={styles.spacersr}></view>
         <View style={styles.box1}>
           <View style={styles.box1Title}>
             <Text style={styles.boxTitleText}>
@@ -89,7 +95,10 @@ export default class checklist extends Component{
           </View>
           
         </View>
-
+  <view style={styles.vspacers}></view>
+<view style={styles.spacers}></view>
+<view style={styles.vspacersr}></view>  
+<view style={styles.spacersr}></view>
         <View style={styles.box2}>
 
           <View style={styles.box2Title}>
@@ -145,6 +154,36 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
+ 
+ 
+  vspacers:{
+width: deviceWidth/300,
+height: deviceHeight/20,
+backgroundColor: 'blue',
+right: deviceWidth/3,
+
+
+  },
+    vspacersr:{
+width: deviceWidth/300,
+height: deviceHeight/40,
+backgroundColor: 'red',
+right: deviceWidth/3,
+
+
+  },
+   spacersr:{
+width: deviceWidth,
+height: deviceWidth/300,
+backgroundColor: 'red',
+marginBottom:deviceHeight/100,
+  },
+  spacers:{
+width: deviceWidth,
+height: deviceWidth/300,
+backgroundColor: 'blue',
+marginBottom:deviceHeight/100,
+  },
   titleP: {
     fontWeight: 'bold',
     fontSize: deviceHeight / 30,
@@ -162,7 +201,7 @@ const styles = StyleSheet.create({
   //Body elements
   body: {
     flex: 10,
-    backgroundColor: '#E6E6FA',
+    backgroundColor: '#fef2bf',
     alignItems: 'center',
   },
 

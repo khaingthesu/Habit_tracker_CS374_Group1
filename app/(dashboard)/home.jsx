@@ -50,6 +50,7 @@ const Home = () => {
 
     
           <Text style={styles.taskTitle}>Today's Tasks:</Text> {/* somehow dynamically change later, idk how though */}
+                 
                  <Scrollbar style={styles.tscroll}>
           <View style={styles.fullTask}>
             <Checkbox value={task1} onValueChange={value => {setTask1(value);}}/>
@@ -113,6 +114,7 @@ const styles = StyleSheet.create({
       flexDirection: 'row',
     backgroundColor: '#fef2bf',
      borderStyle: 'dotted',
+     
     width: deviceHeight / 10,
     margin: deviceHeight/100,
     borderBottomWidth: deviceHeight / 200,
