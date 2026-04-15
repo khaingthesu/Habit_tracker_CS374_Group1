@@ -1,32 +1,62 @@
 import { Link } from 'expo-router';
-import { Dimensions, Image, StyleSheet, Text, View } from "react-native";
-import Logo from "../assets/logo.png";
+import { useState } from "react";
+import { Alert, Dimensions, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 // Get device dimensions for responsive design
 const deviceWidth = Dimensions.get("window").width;
 const deviceHeight = Dimensions.get("window").height;
+// Login Screen Component
+const LoginScreen = () => {
+const [email, setEmail] = useState("");
+const [password, setPassword] = useState("");
 
-// LOGIN/SIGNUP Screen Component
-const HomePage = () => {
   return (
     <View style={styles.container}>
-
-    <View style={styles.topBar}>
-        <Image source={Logo} style={styles.logoIcon} />
         <View style={styles.logoBox}>
-            
-            <Text style={styles.logoSubtitle}>Build better days, one habit at a time.</Text>
-        </View>
+        <Text style={styles.logoSubtitle}>Rootine</Text>
+    
     </View>
 
 
-      {/* signin */}
-      <View style={styles.signinlink}>
-        <Link href="/login" asChild>
-          <Text style={styles.signinText}>Sign In</Text>
+    <View style={styles.form}>
+        <Text style={styles.label}>Email</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="you@example.com"
+          placeholderTextColor="#bbb"
+          keyboardType="email-address"
+          autoCapitalize="none"
+          value={email}
+          onChangeText={setEmail}
+        />
+
+        <Text style={styles.label}>Password</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Enter your password"
+          placeholderTextColor="#bbb"
+          secureTextEntry
+          value={password}
+          onChangeText={setPassword}
+        />
+
+        <TouchableOpacity>
+          <Text style={styles.forgot}>Forgot password?</Text>
+        </TouchableOpacity>
+
+        <Link href="/home" asChild>
+          <TouchableOpacity style={styles.loginBtn}
+            onPress={() => {
+            if (email || password) {
+            Alert.alert("Missing Fields", "Please enter your email and password.");
+                return;
+                }}}
+            >
+            <Text style={styles.loginBtnText}>Log In</Text>
+          </TouchableOpacity>
         </Link>
       </View>
 
-      {/* Footer */}
+     
       <View style={styles.footer}>
         <View style={styles.divider} />
         <View style={styles.signupRow}>
@@ -43,7 +73,6 @@ const HomePage = () => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     width: deviceWidth,
     height: deviceHeight,
     backgroundColor: "#ffffff",
@@ -69,10 +98,9 @@ logoBox: {
     marginBottom: 40,
   },
   logoIcon: {
-    height: 150,
-    width: 150,
+    height: 100,
+    width: 100,
     marginBottom: 20,
-marginTop: 45,
   },
   
   logoSubtitle: {
@@ -136,30 +164,17 @@ marginTop: 45,
   },
   signupRow: {
     flexDirection: "row",
-    marginBottom: 40,
+    marginBottom: 28,
   },
   footerText: {
     color: "#888",
-    fontSize: 20,
+    fontSize: 14,
   },
   signupLink: {
     color: "#4f8ef7",
-    fontSize: 20,
+    fontSize: 14,
     fontWeight: "600",
   },
-signinlink: {
-    width: "100%",
-    backgroundColor: "#111",
-    borderRadius: 10,
-    paddingVertical: 14,
-    alignItems: "center",
-  },
-signinText: {
-    color: "#fff",
-    fontSize: 20,
-    fontWeight: "700",
-    
-},
 });
 
-export default HomePage;
+export default LoginScreen;
