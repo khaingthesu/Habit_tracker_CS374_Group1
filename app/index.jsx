@@ -1,45 +1,50 @@
 import { Link } from 'expo-router';
-import { Dimensions, Image, StyleSheet, Text, View } from "react-native";
+import {
+Dimensions,
+Image,
+StyleSheet,
+Text,
+TouchableOpacity,
+View } from "react-native";
 import Logo from "../assets/logo.png";
-// Get device dimensions for responsive design
+
 const deviceWidth = Dimensions.get("window").width;
 const deviceHeight = Dimensions.get("window").height;
 
-// LOGIN/SIGNUP Screen Component
 const HomePage = () => {
   return (
     <View style={styles.container}>
 
-    <View style={styles.topBar}>
+      {/* Logo */}
+      <View style={styles.topBar}>
         <Image source={Logo} style={styles.logoIcon} />
-        <View style={styles.logoBox}>
-            
-            <Text style={styles.logoSubtitle}>Build better days, one habit at a time.</Text>
-        </View>
-    </View>
-
-
-      {/* signin */}
-      <View style={styles.signinlink}>
-        <Link href="/login" asChild>
+        <Text style={styles.logoSubtitle}>
+          Build better days, one habit at a time.
+        </Text>
+      </View>
+<View style={styles.bottomPart}>
+      {/* Sign In Button */}
+      <Link href="/login" asChild>
+        <TouchableOpacity style={styles.signinBtn}>
           <Text style={styles.signinText}>Sign In</Text>
-        </Link>
-      </View>
+        </TouchableOpacity>
+      </Link>
 
-      {/* Footer */}
-      <View style={styles.footer}>
-        <View style={styles.divider} />
-        <View style={styles.signupRow}>
-          <Text style={styles.footerText}>Don't have an account? </Text>
-          <Link href="/create" asChild>
+      {/* Sign Up */}
+      <Link href="/create" asChild>
+        <TouchableOpacity>
+          <View style={styles.footer}>
+            <Text style={styles.footerText}>Don't have an account? </Text>
             <Text style={styles.signupLink}>Sign Up</Text>
-          </Link>
-        </View>
-      </View>
-
+          </View>
+        </TouchableOpacity>
+      </Link>
+</View>
     </View>
   );
 };
+
+export default HomePage;
 
 const styles = StyleSheet.create({
   container: {
@@ -125,8 +130,9 @@ marginTop: 45,
   footer: {
     width: "100%",
     alignItems: "center",
-    position: "absolute",
-    bottom: 0,
+    flexDirection: "row",
+    justifyContent: "center",
+    paddingVertical: 20,
   },
   divider: {
     width: "100%",
@@ -147,7 +153,9 @@ marginTop: 45,
     fontSize: 20,
     fontWeight: "600",
   },
-signinlink: {
+
+signinBtn: {
+    
     width: "100%",
     backgroundColor: "#111",
     borderRadius: 10,
@@ -160,6 +168,11 @@ signinText: {
     fontWeight: "700",
     
 },
+bottomPart: {
+    width: "85%",
+    marginTop: 80, 
+    alignItems: "center",
+    justifyContent: "center",
+},
 });
 
-export default HomePage;
