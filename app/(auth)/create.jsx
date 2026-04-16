@@ -96,19 +96,30 @@ const SignupScreen = () => {
           onChangeText={setPassword}
         />
 
-        {error && <Text style={styles.error}>{error}</Text>}
+       {error && <Text style={{ color: "red", marginTop: 10 }}>{error}</Text>}
 
         <TouchableOpacity
-          style={[
-            styles.loginBtn,
-            (!email || password.length < 6) && { backgroundColor: "#ccc" }
-          ]}
-          onPress={handleSignup}
-          disabled={!email || password.length < 6}
+                    style={[
+                        styles.loginBtn,
+                        (!email || password.length < 6) && { backgroundColor: "#1b1a1a" }
+                    ]}
+                    onPress={() => {
+                        if (!email || !password) {
+                        setError("Please enter email and password.");
+                        return;
+                        }
+
+                        if (password.length < 6) {
+                        setError("Password must be at least 6 characters.");
+                        return;
+                        }
+
+                        handleSignup();
+                    }}
         >
-          <Text style={styles.loginBtnText}>Sign Up</Text>
-        </TouchableOpacity>
-      </View>
+  <Text style={styles.loginBtnText}>Sign Up</Text>
+</TouchableOpacity>
+      </View> 
 
       {/* Footer */}
       <View style={styles.footer}>
