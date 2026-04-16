@@ -4,6 +4,8 @@ import Checkbox from 'expo-checkbox'
 import React, { Component } from 'react';  
 import AddListModal from '../components/AddListModal';
 import DeleteListModal from '../components/DeleteListModal';
+import AddTaskModal from '../components/AddTaskModal';
+import DeleteTaskModal from '../components/DeleteTaskModal';
 
 let deviceHeight = Dimensions.get('window').height;
 let deviceWidth = Dimensions.get('window').width;
@@ -12,9 +14,11 @@ let deviceWidth = Dimensions.get('window').width;
 export default class checklist extends Component{
   state = {
     lists: [],
-    inputTasks: {},
     addModalVisible: false,
     deleteModalVisible: false,
+    addTaskModalVisible: false,
+    deleteTaskModalVisible: false,
+    activeListId: null,
   }
 /* Function to add group list */
   handleAddList = (title, color) => {
@@ -26,7 +30,6 @@ export default class checklist extends Component{
     };
     this.setState(prevState => ({
       lists: [...prevState.lists, newList],
-      inputTasks: { ...prevState.inputTasks, [newList.id]: '' },
       addModalVisible: false
     }));
   }
@@ -35,43 +38,54 @@ export default class checklist extends Component{
   handleDeleteLists = (idsToDelete) => {
     this.setState(prevState => {
       const newLists = prevState.lists.filter(list => !idsToDelete.includes(list.id));
-      const newInputTasks = { ...prevState.inputTasks };
-      idsToDelete.forEach(id => delete newInputTasks[id]);
       return {
         lists: newLists,
-        inputTasks: newInputTasks,
         deleteModalVisible: false
       };
     });
   }
 
-  /* Function to handle task input change */
-  handleTaskInputChange = (listId, text) => {
-    this.setState(prevState => ({
-      inputTasks: {
-        ...prevState.inputTasks,
-        [listId]: text
-      }
-    }));
-  }
-
-  handleAddTask = (listId) => {
-    const text = this.state.inputTasks[listId];
-    if (!text || text.trim() === '') return;
-    
+  handleAddTask = (listId, taskData) => {
     this.setState(prevState => {
       const newLists = prevState.lists.map(list => {
         if (list.id === listId) {
           return {
             ...list,
-            tasks: [...list.tasks, { id: Date.now().toString(), text, checked: false }]
+            tasks: [...list.tasks, { 
+              id: Date.now().toString(), 
+              text: taskData.taskName, 
+              notes: taskData.notes,
+              dueTime: taskData.dueTime,
+              dueDate: taskData.dueDate,
+              checked: false 
+            }]
           };
         }
         return list;
       });
       return {
         lists: newLists,
-        inputTasks: { ...prevState.inputTasks, [listId]: '' }
+        addTaskModalVisible: false,
+        activeListId: null
+      };
+    });
+  }
+
+  handleDeleteTasks = (listId, taskIdsToDelete) => {
+    this.setState(prevState => {
+      const newLists = prevState.lists.map(list => {
+        if (list.id === listId) {
+          return {
+            ...list,
+            tasks: list.tasks.filter(task => !taskIdsToDelete.includes(task.id))
+          };
+        }
+        return list;
+      });
+      return {
+        lists: newLists,
+        deleteTaskModalVisible: false,
+        activeListId: null
       };
     });
   }
@@ -98,6 +112,11 @@ export default class checklist extends Component{
   }
 
   render() {
+    // Get active list tasks if in delete tasks mode
+    const activeTasks = this.state.activeListId 
+      ? this.state.lists.find(l => l.id === this.state.activeListId)?.tasks || []
+      : [];
+
     return(
     <View style={styles.container}>
 
@@ -139,17 +158,23 @@ export default class checklist extends Component{
             <View key={list.id} style={[styles.boxConfig, { borderColor: list.color }]}>
               <View style={[styles.boxTitleConfig, { backgroundColor: list.color }]}>
                 <Text style={styles.boxTitleText}>{list.title}</Text>
-                <TextInput 
-                  style={styles.taskInput}
-                  onChangeText={(text) => this.handleTaskInputChange(list.id, text)}
-                  value={this.state.inputTasks[list.id] !== undefined ? this.state.inputTasks[list.id] : ''}
-                  placeholder="Add Task"
-                  placeholderTextColor="#666"
-                />
-                <View style={styles.addedIconContainer}>
-                  <TouchableHighlight underlayColor="transparent" onPress={() => this.handleAddTask(list.id)}>
+                <View style={styles.listIconsContainer}>
+                  <TouchableHighlight 
+                    underlayColor="transparent" 
+                    onPress={() => this.setState({ deleteTaskModalVisible: true, activeListId: list.id })}
+                    style={styles.listIconAction}
+                  >
+                    <Image source={{ uri: 'https://i.fbcd.co/products/original/de18ae7d25cea00a569f391100ae56d990105791a99a2d42f35d84477a869d68.jpg' }}
+                      style={styles.boxImageSmall}/>
+                  </TouchableHighlight>
+                  
+                  <TouchableHighlight 
+                    underlayColor="transparent" 
+                    onPress={() => this.setState({ addTaskModalVisible: true, activeListId: list.id })}
+                    style={styles.listIconAction}
+                  >
                     <Image source={{ uri: 'https://static.vecteezy.com/system/resources/thumbnails/000/376/259/small/Basic_Elements__28121_29.jpg' }}
-                      style={styles.boxImage}/>
+                      style={styles.boxImageSmall}/>
                   </TouchableHighlight>
                 </View>
               </View>
@@ -183,6 +208,21 @@ export default class checklist extends Component{
         lists={this.state.lists}
         onClose={() => this.setState({ deleteModalVisible: false })}
         onDelete={this.handleDeleteLists}
+      />
+
+      <AddTaskModal 
+        visible={this.state.addTaskModalVisible} 
+        listId={this.state.activeListId}
+        onClose={() => this.setState({ addTaskModalVisible: false, activeListId: null })}
+        onCreate={this.handleAddTask}
+      />
+
+      <DeleteTaskModal 
+        visible={this.state.deleteTaskModalVisible} 
+        listId={this.state.activeListId}
+        tasks={activeTasks}
+        onClose={() => this.setState({ deleteTaskModalVisible: false, activeListId: null })}
+        onDelete={this.handleDeleteTasks}
       />
     </View>
     );
@@ -283,20 +323,21 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 
-  taskInput:{
-    width:150,
-    height: 40,
-    backgroundColor:'white',
-
-    borderWidth: 2.2,
-    borderRadius: 20,
-
-    paddingHorizontal: 10,
+  listIconsContainer: {
+    flexDirection: 'row',
     marginLeft: 10,
+    alignItems: 'center',
   },
   
-  addedIconContainer: {
-    marginLeft: 10,
+  listIconAction: {
+    marginLeft: 15,
+  },
+
+  boxImageSmall: {
+    height: 32,
+    width: 32,
+    borderRadius: 16,
+    borderWidth: 1.5,
   },
 
   boxImage:{
