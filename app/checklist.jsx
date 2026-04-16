@@ -1,15 +1,120 @@
-import { StyleSheet, Text, View, Dimensions, TouchableHighlight, Image, TextInput} from 'react-native'
+import { StyleSheet, Text, View, Dimensions, TouchableHighlight, Image, TextInput, ScrollView } from 'react-native'
 import {Link, Stack} from 'expo-router'
 import Checkbox from 'expo-checkbox'
 import React, { Component } from 'react';  
+import AddListModal from '../components/AddListModal';
+import DeleteListModal from '../components/DeleteListModal';
 
 let deviceHeight = Dimensions.get('window').height;
 let deviceWidth = Dimensions.get('window').width;
 
+const INITIAL_DUMMY_DATA = [
+  { 
+    id: '1', 
+    title: 'Home', 
+    color: 'red', 
+    tasks: [
+      {id: 't1', text: 'Do dishes', checked: false}, 
+      {id: 't2', text: 'Laundry', checked: false}, 
+      {id: 't3', text: 'Grocery Shopping', checked: false}
+    ]
+  },
+  { 
+    id: '2', 
+    title: 'School', 
+    color: 'green', 
+    tasks: [
+      {id: 't4', text: 'Do dishes', checked: false}, 
+      {id: 't5', text: 'Laundry', checked: false}, 
+      {id: 't6', text: 'Grocery Shopping', checked: false}
+    ] 
+  }
+];
+
 export default class checklist extends Component{
   state = {
-    task: 'Add Task',
-    task2: 'Add Task'
+    lists: INITIAL_DUMMY_DATA,
+    inputTasks: { '1': '', '2': '' },
+    addModalVisible: false,
+    deleteModalVisible: false,
+  }
+
+  handleAddList = (title, color) => {
+    const newList = {
+      id: Date.now().toString(),
+      title,
+      color,
+      tasks: []
+    };
+    this.setState(prevState => ({
+      lists: [...prevState.lists, newList],
+      inputTasks: { ...prevState.inputTasks, [newList.id]: '' },
+      addModalVisible: false
+    }));
+  }
+
+  handleDeleteLists = (idsToDelete) => {
+    this.setState(prevState => {
+      const newLists = prevState.lists.filter(list => !idsToDelete.includes(list.id));
+      const newInputTasks = { ...prevState.inputTasks };
+      idsToDelete.forEach(id => delete newInputTasks[id]);
+      return {
+        lists: newLists,
+        inputTasks: newInputTasks,
+        deleteModalVisible: false
+      };
+    });
+  }
+
+  handleTaskInputChange = (listId, text) => {
+    this.setState(prevState => ({
+      inputTasks: {
+        ...prevState.inputTasks,
+        [listId]: text
+      }
+    }));
+  }
+
+  handleAddTask = (listId) => {
+    const text = this.state.inputTasks[listId];
+    if (!text || text.trim() === '') return;
+    
+    this.setState(prevState => {
+      const newLists = prevState.lists.map(list => {
+        if (list.id === listId) {
+          return {
+            ...list,
+            tasks: [...list.tasks, { id: Date.now().toString(), text, checked: false }]
+          };
+        }
+        return list;
+      });
+      return {
+        lists: newLists,
+        inputTasks: { ...prevState.inputTasks, [listId]: '' }
+      };
+    });
+    alert('Task: "' + text + '" added!');
+  }
+
+  toggleTaskCheck = (listId, taskId) => {
+    this.setState(prevState => {
+      const newLists = prevState.lists.map(list => {
+        if (list.id === listId) {
+          return {
+            ...list,
+            tasks: list.tasks.map(task => {
+              if (task.id === taskId) {
+                return { ...task, checked: !task.checked };
+              }
+              return task;
+            })
+          };
+        }
+        return list;
+      });
+      return { lists: newLists };
+    });
   }
 
   render() {
@@ -18,9 +123,9 @@ export default class checklist extends Component{
 
       <View style={styles.header}>
         <Text style={styles.titleP}>Habit Tracker</Text> 
-        <TouchableHighlight onPress={() => alert('Logo pressed - redirect to profile')}>
+        <TouchableHighlight underlayColor="transparent" onPress={() => alert('Logo pressed - redirect to profile')}>
           <Image
-            source={{ uri: 'https://picsum.photos/id/237/200/300' } /* Replace image with logo later */}
+            source={{ uri: 'https://picsum.photos/id/237/200/300' }}
           style={styles.logo}
           />
         </TouchableHighlight>
@@ -36,97 +141,75 @@ export default class checklist extends Component{
 
         <View style={styles.buttons}>
           <View style={styles.icon}>
-            <TouchableHighlight onPress={() => alert('Edit mode pressed')}>
+            <TouchableHighlight id="edit" underlayColor="transparent" onPress={() => alert('Edit mode pressed')}>
               <Image source={{ uri: 'https://www.creativefabrica.com/wp-content/uploads/2019/12/16/Black-thin-line-pen-icon-Graphics-1-1-580x386.jpg' }}
                 style={styles.iconImage}/>
             </TouchableHighlight>
           </View>
           <View style={styles.icon}>
-            <TouchableHighlight onPress={() => alert('Delete mode pressed')}>
+            <TouchableHighlight id="delete" underlayColor="transparent" onPress={() => this.setState({ deleteModalVisible: true })}>
               <Image source={{ uri: 'https://i.fbcd.co/products/original/de18ae7d25cea00a569f391100ae56d990105791a99a2d42f35d84477a869d68.jpg' }}
                 style={styles.iconImage}/>
             </TouchableHighlight>
           </View>
           <View style={styles.icon}>
-            <TouchableHighlight onPress={() => alert('Add mode pressed')}>
-              <Image source={{ uri: 'https://static.vecteezy.com/system/resources/thumbnails/000/376/259/small/Basic_Elements__28121_29.jpg' } }
+            <TouchableHighlight id="add" underlayColor="transparent" onPress={() => this.setState({ addModalVisible: true })}>
+              <Image source={{ uri: 'https://static.vecteezy.com/system/resources/thumbnails/000/376/259/small/Basic_Elements__28121_29.jpg' }}
                 style={styles.iconImage}/>
             </TouchableHighlight>
           </View>
         </View>
 
-        <View style={styles.box1}>
-          <View style={styles.box1Title}>
-            <Text style={styles.boxTitleText}>
-              Home
-            </Text>
-            <TextInput 
-              style={styles.taskInput}
-              onChangeText = {(task) => this.setState({task})}
-              value = {this.state.task}
-            />
-            <View style={styles.icon}>
-              <TouchableHighlight onPress={() => alert('Task: "' + this.state.task + '" added!')}>
-                <Image source={{ uri: 'https://static.vecteezy.com/system/resources/thumbnails/000/376/259/small/Basic_Elements__28121_29.jpg' } }
-                  style={styles.boxImage}/>
-              </TouchableHighlight>
-            </View>
-          </View>
+        <ScrollView style={styles.listsScrollContainer} contentContainerStyle={{ alignItems: 'center' }}>
+          {this.state.lists.map(list => (
+            <View key={list.id} style={[styles.boxConfig, { borderColor: list.color }]}>
+              <View style={[styles.boxTitleConfig, { backgroundColor: list.color }]}>
+                <Text style={styles.boxTitleText}>{list.title}</Text>
+                <TextInput 
+                  style={styles.taskInput}
+                  onChangeText={(text) => this.handleTaskInputChange(list.id, text)}
+                  value={this.state.inputTasks[list.id] !== undefined ? this.state.inputTasks[list.id] : ''}
+                  placeholder="Add Task"
+                  placeholderTextColor="#666"
+                />
+                <View style={styles.addedIconContainer}>
+                  <TouchableHighlight underlayColor="transparent" onPress={() => this.handleAddTask(list.id)}>
+                    <Image source={{ uri: 'https://static.vecteezy.com/system/resources/thumbnails/000/376/259/small/Basic_Elements__28121_29.jpg' }}
+                      style={styles.boxImage}/>
+                  </TouchableHighlight>
+                </View>
+              </View>
 
-          <View style={styles.listTasks}>
-            <View style={styles.task}>
-              <Checkbox style={styles.checkbox}/>
-              <Text style={styles.taskText}>Do dishes </Text>
+              <View style={styles.listTasks}>
+                {list.tasks.map(task => (
+                  <View key={task.id} style={styles.task}>
+                    <Checkbox 
+                      style={styles.checkbox}
+                      value={task.checked}
+                      onValueChange={() => this.toggleTaskCheck(list.id, task.id)}
+                    />
+                    <Text style={styles.taskText}>{task.text}</Text>
+                  </View>
+                ))}
+              </View>
             </View>
-            <View style={styles.task}>
-              <Checkbox style={styles.checkbox}/>
-              <Text style={styles.taskText}>Laundry </Text>
-            </View>
-            <View style={styles.task}>
-              <Checkbox style={styles.checkbox}/>
-              <Text style={styles.taskText}>Grocery Shopping </Text>
-            </View>
-          </View>
-          
-        </View>
-
-        <View style={styles.box2}>
-
-          <View style={styles.box2Title}>
-            <Text style={styles.boxTitleText}>
-              School
-            </Text>
-            <TextInput 
-              style={styles.taskInput}
-              onChangeText = {(task2) => this.setState({task2})}
-              value = {this.state.task2}
-            />
-            <View style={styles.icon}>
-              <TouchableHighlight onPress={() => alert('Task: "' + this.state.task2 + '" added!')}>
-                <Image source={{ uri: 'https://static.vecteezy.com/system/resources/thumbnails/000/376/259/small/Basic_Elements__28121_29.jpg' } }
-                  style={styles.boxImage}/>
-              </TouchableHighlight>
-            </View>
-          </View>
-
-          <View style={styles.listTasks}>
-            <View style={styles.task}>
-              <Checkbox style={styles.checkbox}/>
-              <Text style={styles.taskText}>Do dishes </Text>
-            </View>
-            <View style={styles.task}>
-              <Checkbox style={styles.checkbox}/>
-              <Text style={styles.taskText}>Laundry </Text>
-            </View>
-            <View style={styles.task}>
-              <Checkbox style={styles.checkbox}/>
-              <Text style={styles.taskText}>Grocery Shopping </Text>
-            </View>
-          </View>
-
-        </View>
+          ))}
+          <View style={{ height: 40 }} />
+        </ScrollView>
       </View>
 
+      <AddListModal 
+        visible={this.state.addModalVisible} 
+        onClose={() => this.setState({ addModalVisible: false })}
+        onCreate={this.handleAddList}
+      />
+
+      <DeleteListModal 
+        visible={this.state.deleteModalVisible} 
+        lists={this.state.lists}
+        onClose={() => this.setState({ deleteModalVisible: false })}
+        onDelete={this.handleDeleteLists}
+      />
     </View>
     );
   }
@@ -199,17 +282,21 @@ const styles = StyleSheet.create({
   },
 
 //Task boxes
-  box1:{
-    height: deviceHeight/4,
+  listsScrollContainer: {
+    width: '100%',
+    flex: 1,
+  },
+  
+  boxConfig:{
+    minHeight: deviceHeight/4,
     width: deviceWidth/1.5,
 
     borderWidth: 3,
-    borderColor: 'red',
     marginBottom: 30,
+    overflow: 'hidden',
   },
 
-  box1Title:{
-    backgroundColor:'red',
+  boxTitleConfig:{
     padding: 15,
     flexDirection: 'row',
     alignItems: 'center',
@@ -219,18 +306,23 @@ const styles = StyleSheet.create({
     fontSize: 20,
     color: 'white',
     fontWeight: 'bold',
+    flex: 1,
   },
 
   taskInput:{
     width:150,
-    height: 50,
+    height: 40,
     backgroundColor:'white',
 
     borderWidth: 2.2,
     borderRadius: 20,
 
-    padding: 10,
-    marginLeft: 18,
+    paddingHorizontal: 10,
+    marginLeft: 10,
+  },
+  
+  addedIconContainer: {
+    marginLeft: 10,
   },
 
   boxImage:{
@@ -239,27 +331,13 @@ const styles = StyleSheet.create({
 
     borderRadius:40,
     borderWidth: 1.5,
-
-    marginLeft: 5,
-    marginRight: 10,
-  },
-
-  box2:{
-    height: deviceHeight/4,
-    width: deviceWidth/1.5,
-
-    borderWidth: 3,
-    borderColor: 'green',
-  },
-
-  box2Title:{
-    backgroundColor:'green',
-    padding: 15,
-    flexDirection: 'row',
-    alignItems: 'center',
   },
 
   //Boxes list of tasks
+  listTasks: {
+    paddingBottom: 15,
+  },
+
   task:{
     marginLeft: 15,
     marginTop: 10,
