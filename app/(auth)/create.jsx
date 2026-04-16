@@ -3,7 +3,6 @@ import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, serverTimestamp, setDoc } from 'firebase/firestore';
 import { useState } from "react";
 import {
-    Alert,
     Dimensions,
     StyleSheet,
     Text,
@@ -18,38 +17,36 @@ const deviceWidth = Dimensions.get("window").width;
 const deviceHeight = Dimensions.get("window").height;
 
 const SignupScreen = () => {
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
-
   const router = useRouter();
 
+// Handle signup logic
   const handleSignup = async () => {
-    console.log("Signup clicked");
     setError(null);
 
-    // ✅ Basic validation
+    //Basic validation
     if (!email || !password) {
       setError("Please enter your email and password.");
       return;
     }
 
-    if (password.length < 6) {
+    else if (password.length < 6) {
       setError("Password must be at least 6 characters.");
       return;
     }
 
+// Firebase signup
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
 
-      // ✅ Save user to Firestore
+      // Save user to Firestore
       await setDoc(doc(db, "users", userCredential.user.uid), {
         email: userCredential.user.email,
         createdAt: serverTimestamp(),
       });
-
-      Alert.alert("Success", "Account created!");
-
       // Firebase already logs user in → go to home
       router.replace("/");
 
@@ -99,27 +96,12 @@ const SignupScreen = () => {
        {error && <Text style={{ color: "red", marginTop: 10 }}>{error}</Text>}
 
         <TouchableOpacity
-                    style={[
-                        styles.loginBtn,
-                        (!email || password.length < 6) && { backgroundColor: "#1b1a1a" }
-                    ]}
-                    onPress={() => {
-                        if (!email || !password) {
-                        setError("Please enter email and password.");
-                        return;
-                        }
-
-                        if (password.length < 6) {
-                        setError("Password must be at least 6 characters.");
-                        return;
-                        }
-
-                        handleSignup();
-                    }}
-        >
-  <Text style={styles.loginBtnText}>Sign Up</Text>
-</TouchableOpacity>
-      </View> 
+            style={styles.loginBtn}
+            onPress={handleSignup}
+            >
+                <Text style={styles.loginBtnText}>Sign Up</Text>
+     </TouchableOpacity>
+      </View>
 
       {/* Footer */}
       <View style={styles.footer}>
