@@ -1,23 +1,57 @@
-import { Link } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { useState } from "react";
-import { Alert, Dimensions, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
-// Get device dimensions for responsive design
+import {
+  Alert,
+  Dimensions,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
+} from "react-native";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../../firebase";
+
 const deviceWidth = Dimensions.get("window").width;
 const deviceHeight = Dimensions.get("window").height;
-// Login Screen Component
+
 const LoginScreen = () => {
-const [email, setEmail] = useState("");
-const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState(null);
+
+  const router = useRouter();
+
+  const handleLogin = async () => {
+    setError(null);
+
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+
+      // ✅ success → go to home
+      router.replace("/home");
+
+    } catch (err) {
+      if (err.code === "auth/user-not-found") {
+        setError("No account found.");
+      } else if (err.code === "auth/wrong-password") {
+        setError("Incorrect password.");
+      } else {
+        setError("Invalid email or password.");
+      }
+    }
+  };
 
   return (
     <View style={styles.container}>
-        <View style={styles.logoBox}>
+
+      {/* Logo */}
+      <View style={styles.logoBox}>
         <Text style={styles.logoSubtitle}>Rootine</Text>
-    
-    </View>
+      </View>
 
-
-    <View style={styles.form}>
+      {/* Form */}
+      <View style={styles.form}>
         <Text style={styles.label}>Email</Text>
         <TextInput
           style={styles.input}
@@ -39,79 +73,64 @@ const [password, setPassword] = useState("");
           onChangeText={setPassword}
         />
 
-        <TouchableOpacity>
-          <Text style={styles.forgot}>Forgot password?</Text>
+        {/* ❗ Inline error */}
+        {error && <Text style={styles.error}>{error}</Text>}
+
+        {/* ✅ Button ALWAYS clickable */}
+        <TouchableOpacity
+          style={[
+            styles.loginBtn,
+            (!email || !password) && styles.disabledBtn
+          ]}
+          onPress={() => {
+            if (!email || !password) {
+              Alert.alert("Missing Fields", "Please enter email and password.");
+              return;
+            }
+
+            handleLogin();
+          }}
+        >
+          <Text style={styles.loginBtnText}>Log In</Text>
         </TouchableOpacity>
 
-        <Link href="/home" asChild>
-          <TouchableOpacity style={styles.loginBtn}
-            onPress={() => {
-            if (email || password) {
-            Alert.alert("Missing Fields", "Please enter your email and password.");
-                return;
-                }}}
-            >
-            <Text style={styles.loginBtnText}>Log In</Text>
-          </TouchableOpacity>
-        </Link>
-      </View>
-
-     
-      <View style={styles.footer}>
-        <View style={styles.divider} />
-        <View style={styles.signupRow}>
-          <Text style={styles.footerText}>Don't have an account? </Text>
-          <Link href="/create" asChild>
-            <Text style={styles.signupLink}>Sign Up</Text>
-          </Link>
-        </View>
       </View>
 
     </View>
   );
 };
 
+export default LoginScreen;
+
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
     width: deviceWidth,
     height: deviceHeight,
     backgroundColor: "#ffffff",
     justifyContent: "flex-start",
     alignItems: "center",
     paddingHorizontal: 28,
-    paddingTop: 10,
+    paddingTop: 40,
   },
-header: {
-    flex: 1.5,
-    backgroundColor: 'teal',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-topBar:{
-    justifyContent: 'flex-start',
-    alignItems: 'center',
-    },
 
-logoBox: {
+  logoBox: {
     alignItems: "center",
     marginBottom: 40,
   },
-  logoIcon: {
-    height: 100,
-    width: 100,
-    marginBottom: 20,
-  },
-  
+
   logoSubtitle: {
-    fontSize: 13,
-    color: "#999",
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#111",
     textAlign: "center",
   },
+
   form: {
     width: "100%",
     marginBottom: 24,
   },
+
   label: {
     fontSize: 13,
     fontWeight: "600",
@@ -119,6 +138,7 @@ logoBox: {
     marginBottom: 6,
     marginTop: 14,
   },
+
   input: {
     width: "100%",
     borderWidth: 1,
@@ -130,51 +150,32 @@ logoBox: {
     color: "#111",
     backgroundColor: "#fafafa",
   },
-  forgot: {
-    color: "#4f8ef7",
-    fontSize: 13,
-    textAlign: "right",
-    marginTop: 8,
-    marginBottom: 20,
-  },
+
   loginBtn: {
     width: "100%",
     backgroundColor: "#111",
     borderRadius: 10,
     paddingVertical: 14,
     alignItems: "center",
+    marginTop: 20,
   },
+
   loginBtnText: {
     color: "#fff",
     fontSize: 15,
     fontWeight: "700",
-    letterSpacing: 0.3,
   },
-  footer: {
-    width: "100%",
-    alignItems: "center",
-    position: "absolute",
-    bottom: 0,
+
+  disabledBtn: {
+    backgroundColor: "#ccc", // looks disabled but still clickable
   },
-  divider: {
-    width: "100%",
-    height: 1,
-    backgroundColor: "#ebebeb",
-    marginBottom: 16,
-  },
-  signupRow: {
-    flexDirection: "row",
-    marginBottom: 28,
-  },
-  footerText: {
-    color: "#888",
-    fontSize: 14,
-  },
-  signupLink: {
-    color: "#4f8ef7",
-    fontSize: 14,
-    fontWeight: "600",
+
+  error: {
+    color: "#b00020",
+    backgroundColor: "#f8d7da",
+    padding: 10,
+    borderRadius: 6,
+    marginTop: 10,
+    textAlign: "center",
   },
 });
-
-export default LoginScreen;
