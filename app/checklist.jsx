@@ -8,37 +8,15 @@ import DeleteListModal from '../components/DeleteListModal';
 let deviceHeight = Dimensions.get('window').height;
 let deviceWidth = Dimensions.get('window').width;
 
-const INITIAL_DUMMY_DATA = [
-  { 
-    id: '1', 
-    title: 'Home', 
-    color: 'red', 
-    tasks: [
-      {id: 't1', text: 'Do dishes', checked: false}, 
-      {id: 't2', text: 'Laundry', checked: false}, 
-      {id: 't3', text: 'Grocery Shopping', checked: false}
-    ]
-  },
-  { 
-    id: '2', 
-    title: 'School', 
-    color: 'green', 
-    tasks: [
-      {id: 't4', text: 'Do dishes', checked: false}, 
-      {id: 't5', text: 'Laundry', checked: false}, 
-      {id: 't6', text: 'Grocery Shopping', checked: false}
-    ] 
-  }
-];
-
+/* Task Group List */
 export default class checklist extends Component{
   state = {
-    lists: INITIAL_DUMMY_DATA,
-    inputTasks: { '1': '', '2': '' },
+    lists: [],
+    inputTasks: {},
     addModalVisible: false,
     deleteModalVisible: false,
   }
-
+/* Function to add group list */
   handleAddList = (title, color) => {
     const newList = {
       id: Date.now().toString(),
@@ -53,6 +31,7 @@ export default class checklist extends Component{
     }));
   }
 
+  /* Function to delete group list */
   handleDeleteLists = (idsToDelete) => {
     this.setState(prevState => {
       const newLists = prevState.lists.filter(list => !idsToDelete.includes(list.id));
@@ -66,6 +45,7 @@ export default class checklist extends Component{
     });
   }
 
+  /* Function to handle task input change */
   handleTaskInputChange = (listId, text) => {
     this.setState(prevState => ({
       inputTasks: {
@@ -94,9 +74,9 @@ export default class checklist extends Component{
         inputTasks: { ...prevState.inputTasks, [listId]: '' }
       };
     });
-    alert('Task: "' + text + '" added!');
   }
 
+  /* toggle task check */
   toggleTaskCheck = (listId, taskId) => {
     this.setState(prevState => {
       const newLists = prevState.lists.map(list => {
@@ -140,12 +120,6 @@ export default class checklist extends Component{
         </View>
 
         <View style={styles.buttons}>
-          <View style={styles.icon}>
-            <TouchableHighlight id="edit" underlayColor="transparent" onPress={() => alert('Edit mode pressed')}>
-              <Image source={{ uri: 'https://www.creativefabrica.com/wp-content/uploads/2019/12/16/Black-thin-line-pen-icon-Graphics-1-1-580x386.jpg' }}
-                style={styles.iconImage}/>
-            </TouchableHighlight>
-          </View>
           <View style={styles.icon}>
             <TouchableHighlight id="delete" underlayColor="transparent" onPress={() => this.setState({ deleteModalVisible: true })}>
               <Image source={{ uri: 'https://i.fbcd.co/products/original/de18ae7d25cea00a569f391100ae56d990105791a99a2d42f35d84477a869d68.jpg' }}
