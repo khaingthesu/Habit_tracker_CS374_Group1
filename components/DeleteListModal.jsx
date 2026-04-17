@@ -8,7 +8,7 @@ export default class DeleteListModal extends Component {
   }
 
   toggleSelection = (id) => {
-    const newSelected = new Set(this.state.selectedIds);
+    let newSelected = new Set(this.state.selectedIds);
     if (newSelected.has(id)) {
       newSelected.delete(id);
     } else {
@@ -22,7 +22,13 @@ export default class DeleteListModal extends Component {
       alert("No lists selected for deletion");
       return;
     }
-    this.props.onDelete(Array.from(this.state.selectedIds));
+    
+    let idsToDelete = [];
+    this.state.selectedIds.forEach((id) => {
+      idsToDelete.push(id);
+    });
+
+    this.props.onDelete(idsToDelete);
     this.setState({ selectedIds: new Set() }); // Reset Selection on delete
   }
 
@@ -32,7 +38,37 @@ export default class DeleteListModal extends Component {
   }
 
   render() {
-    const { lists, visible } = this.props;
+    let visible = this.props.visible;
+
+    let listsArray = [];
+    if (this.props.lists) {
+      let inputLists = this.props.lists;
+      for (let i = 0; i < inputLists.length; i++) {
+        listsArray.push(inputLists[i]);
+      }
+    }
+
+    let contentToRender;
+    if (listsArray.length === 0) {
+      contentToRender = <Text style={styles.emptyText}>You dont have any. Create some!</Text>;
+    } else {
+      let renderedLists = [];
+      for (let i = 0; i < listsArray.length; i++) {
+        let list = listsArray[i];
+        renderedLists.push(
+          <View key={list.id} style={styles.listItem}>
+            <Checkbox
+              style={[styles.checkbox, { borderColor: list.color }]}
+              color={this.state.selectedIds.has(list.id) ? list.color : undefined}
+              value={this.state.selectedIds.has(list.id)}
+              onValueChange={() => { this.toggleSelection(list.id); }}
+            />
+            <Text style={styles.listTitle}>{list.title}</Text>
+          </View>
+        );
+      }
+      contentToRender = renderedLists;
+    }
 
     return (
       <Modal visible={visible} animationType="slide" transparent={true} onRequestClose={this.handleClose}>
@@ -41,21 +77,7 @@ export default class DeleteListModal extends Component {
             <Text style={styles.title}>Delete Lists</Text>
             
             <ScrollView style={styles.listContainer}>
-              {lists.length === 0 ? (
-                <Text style={styles.emptyText}>You dont have any. Create some!</Text>
-              ) : (
-                lists.map(list => (
-                  <View key={list.id} style={styles.listItem}>
-                    <Checkbox
-                      style={[styles.checkbox, { borderColor: list.color }]}
-                      color={this.state.selectedIds.has(list.id) ? list.color : undefined}
-                      value={this.state.selectedIds.has(list.id)}
-                      onValueChange={() => this.toggleSelection(list.id)}
-                    />
-                    <Text style={styles.listTitle}>{list.title}</Text>
-                  </View>
-                ))
-              )}
+              {contentToRender}
             </ScrollView>
 
             <View style={styles.buttonRow}>

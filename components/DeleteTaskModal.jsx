@@ -8,7 +8,7 @@ export default class DeleteTaskModal extends Component {
   }
 
   toggleSelection = (id) => {
-    const newSelected = new Set(this.state.selectedIds);
+    let newSelected = new Set(this.state.selectedIds);
     if (newSelected.has(id)) {
       newSelected.delete(id);
     } else {
@@ -22,7 +22,13 @@ export default class DeleteTaskModal extends Component {
       alert("No tasks selected for deletion");
       return;
     }
-    this.props.onDelete(this.props.listId, Array.from(this.state.selectedIds));
+    
+    let idsToDelete = [];
+    this.state.selectedIds.forEach((id) => {
+      idsToDelete.push(id);
+    });
+
+    this.props.onDelete(this.props.listId, idsToDelete);
     this.setState({ selectedIds: new Set() }); // Reset Selection on delete
   }
 
@@ -32,8 +38,36 @@ export default class DeleteTaskModal extends Component {
   }
 
   render() {
-    const { tasks, visible } = this.props;
-    const tasksList = tasks || [];
+    let visible = this.props.visible;
+
+    let tasksList = [];
+    if (this.props.tasks) {
+      let inputTasks = this.props.tasks;
+      for (let i = 0; i < inputTasks.length; i++) {
+        tasksList.push(inputTasks[i]);
+      }
+    }
+
+    let contentToRender;
+    if (tasksList.length === 0) {
+      contentToRender = <Text style={styles.emptyText}>You dont have any. Create some!</Text>;
+    } else {
+      let renderedTasks = [];
+      for (let i = 0; i < tasksList.length; i++) {
+        let task = tasksList[i];
+        renderedTasks.push(
+          <View key={task.id} style={styles.listItem}>
+            <Checkbox
+              style={styles.checkbox}
+              value={this.state.selectedIds.has(task.id)}
+              onValueChange={() => { this.toggleSelection(task.id); }}
+            />
+            <Text style={styles.listTitle}>{task.text}</Text>
+          </View>
+        );
+      }
+      contentToRender = renderedTasks;
+    }
 
     return (
       <Modal visible={visible} animationType="slide" transparent={true} onRequestClose={this.handleClose}>
@@ -42,20 +76,7 @@ export default class DeleteTaskModal extends Component {
             <Text style={styles.title}>Delete Tasks</Text>
             
             <ScrollView style={styles.listContainer}>
-              {tasksList.length === 0 ? (
-                <Text style={styles.emptyText}>You dont have any. Create some!</Text>
-              ) : (
-                tasksList.map(task => (
-                  <View key={task.id} style={styles.listItem}>
-                    <Checkbox
-                      style={styles.checkbox}
-                      value={this.state.selectedIds.has(task.id)}
-                      onValueChange={() => this.toggleSelection(task.id)}
-                    />
-                    <Text style={styles.listTitle}>{task.text}</Text>
-                  </View>
-                ))
-              )}
+              {contentToRender}
             </ScrollView>
 
             <View style={styles.buttonRow}>

@@ -6,7 +6,7 @@ export default class AddTaskModal extends Component {
     taskName: '',
     notes: '',
     dueTime: '',
-    dueDateMode: '', // 'today', 'tomorrow', 'other'
+    dueDateMode: '',
     otherDueDate: ''
   }
 
@@ -17,18 +17,23 @@ export default class AddTaskModal extends Component {
     }
 
     let finalDueDate = '';
-    const today = new Date();
+    let today = new Date();
+
     if (this.state.dueDateMode === 'today') {
-      finalDueDate = `${today.getMonth() + 1}/${today.getDate()}`;
+      let month = today.getMonth() + 1;
+      let day = today.getDate();
+      finalDueDate = month + '/' + day;
     } else if (this.state.dueDateMode === 'tomorrow') {
-      const tomorrow = new Date(today);
+      let tomorrow = new Date(today);
       tomorrow.setDate(tomorrow.getDate() + 1);
-      finalDueDate = `${tomorrow.getMonth() + 1}/${tomorrow.getDate()}`;
+      let month = tomorrow.getMonth() + 1;
+      let day = tomorrow.getDate();
+      finalDueDate = month + '/' + day;
     } else if (this.state.dueDateMode === 'other') {
       finalDueDate = this.state.otherDueDate;
     }
 
-    const newTaskData = {
+    let newTaskData = {
       taskName: this.state.taskName,
       notes: this.state.notes,
       dueTime: this.state.dueTime,
@@ -36,6 +41,7 @@ export default class AddTaskModal extends Component {
     };
 
     this.props.onCreate(this.props.listId, newTaskData);
+    
     this.setState({
       taskName: '',
       notes: '',
@@ -57,6 +63,39 @@ export default class AddTaskModal extends Component {
   }
 
   render() {
+    let todayButtonStyle = styles.dateButton;
+    let todayTextStyle = styles.dateButtonText;
+    if (this.state.dueDateMode === 'today') {
+        todayButtonStyle = [styles.dateButton, styles.selectedDateButton];
+        todayTextStyle = [styles.dateButtonText, styles.selectedDateButtonText];
+    }
+
+    let tomorrowButtonStyle = styles.dateButton;
+    let tomorrowTextStyle = styles.dateButtonText;
+    if (this.state.dueDateMode === 'tomorrow') {
+        tomorrowButtonStyle = [styles.dateButton, styles.selectedDateButton];
+        tomorrowTextStyle = [styles.dateButtonText, styles.selectedDateButtonText];
+    }
+
+    let otherButtonStyle = styles.dateButton;
+    let otherTextStyle = styles.dateButtonText;
+    if (this.state.dueDateMode === 'other') {
+        otherButtonStyle = [styles.dateButton, styles.selectedDateButton];
+        otherTextStyle = [styles.dateButtonText, styles.selectedDateButtonText];
+    }
+
+    let otherDateInput = null;
+    if (this.state.dueDateMode === 'other') {
+        otherDateInput = (
+          <TextInput 
+            style={[styles.input, { marginTop: 10 }]} 
+            placeholder="mm/dd"
+            value={this.state.otherDueDate}
+            onChangeText={(text) => { this.setState({ otherDueDate: text }); }}
+          />
+        );
+    }
+
     return (
       <Modal visible={this.props.visible} animationType="slide" transparent={true} onRequestClose={this.handleClose}>
         <View style={styles.modalOverlay}>
@@ -68,7 +107,7 @@ export default class AddTaskModal extends Component {
               style={styles.input} 
               placeholder="e.g. Do dishes"
               value={this.state.taskName}
-              onChangeText={(text) => this.setState({ taskName: text })}
+              onChangeText={(text) => { this.setState({ taskName: text }); }}
             />
 
             <Text style={styles.label}>Notes (Optional)</Text>
@@ -77,7 +116,7 @@ export default class AddTaskModal extends Component {
               placeholder="Any details..."
               multiline
               value={this.state.notes}
-              onChangeText={(text) => this.setState({ notes: text })}
+              onChangeText={(text) => { this.setState({ notes: text }); }}
             />
 
             <Text style={styles.label}>Due Time (hh:mm, Optional)</Text>
@@ -85,39 +124,32 @@ export default class AddTaskModal extends Component {
               style={styles.input} 
               placeholder="e.g. 14:30"
               value={this.state.dueTime}
-              onChangeText={(text) => this.setState({ dueTime: text })}
+              onChangeText={(text) => { this.setState({ dueTime: text }); }}
             />
 
             <Text style={styles.label}>Due Date (Optional)</Text>
             <View style={styles.dateButtonsRow}>
               <TouchableOpacity 
-                style={[styles.dateButton, this.state.dueDateMode === 'today' && styles.selectedDateButton]}
-                onPress={() => this.setState({ dueDateMode: 'today' })}
+                style={todayButtonStyle}
+                onPress={() => { this.setState({ dueDateMode: 'today' }); }}
               >
-                <Text style={[styles.dateButtonText, this.state.dueDateMode === 'today' && styles.selectedDateButtonText]}>Today</Text>
+                <Text style={todayTextStyle}>Today</Text>
               </TouchableOpacity>
               <TouchableOpacity 
-                style={[styles.dateButton, this.state.dueDateMode === 'tomorrow' && styles.selectedDateButton]}
-                onPress={() => this.setState({ dueDateMode: 'tomorrow' })}
+                style={tomorrowButtonStyle}
+                onPress={() => { this.setState({ dueDateMode: 'tomorrow' }); }}
               >
-                <Text style={[styles.dateButtonText, this.state.dueDateMode === 'tomorrow' && styles.selectedDateButtonText]}>Tomorrow</Text>
+                <Text style={tomorrowTextStyle}>Tomorrow</Text>
               </TouchableOpacity>
               <TouchableOpacity 
-                style={[styles.dateButton, this.state.dueDateMode === 'other' && styles.selectedDateButton]}
-                onPress={() => this.setState({ dueDateMode: 'other' })}
+                style={otherButtonStyle}
+                onPress={() => { this.setState({ dueDateMode: 'other' }); }}
               >
-                <Text style={[styles.dateButtonText, this.state.dueDateMode === 'other' && styles.selectedDateButtonText]}>Other</Text>
+                <Text style={otherTextStyle}>Other</Text>
               </TouchableOpacity>
             </View>
 
-            {this.state.dueDateMode === 'other' && (
-              <TextInput 
-                style={[styles.input, { marginTop: 10 }]} 
-                placeholder="mm/dd"
-                value={this.state.otherDueDate}
-                onChangeText={(text) => this.setState({ otherDueDate: text })}
-              />
-            )}
+            {otherDateInput}
 
             <View style={styles.buttonRow}>
               <TouchableHighlight style={[styles.button, styles.cancelButton]} underlayColor="#bbb" onPress={this.handleClose}>

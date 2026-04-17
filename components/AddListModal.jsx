@@ -19,6 +19,24 @@ export default class AddListModal extends Component {
   }
 
   render() {
+    let renderedColors = [];
+    for (let i = 0; i < COLORS.length; i++) {
+        let color = COLORS[i];
+        
+        let dynamicStyles = [styles.colorCircle, { backgroundColor: color }];
+        if (this.state.selectedColor === color) {
+            dynamicStyles = [styles.colorCircle, { backgroundColor: color }, styles.selectedColor];
+        }
+
+        renderedColors.push(
+            <TouchableOpacity 
+                key={color} 
+                style={dynamicStyles} 
+                onPress={() => { this.setState({ selectedColor: color }); }}
+            />
+        );
+    }
+
     return (
       <Modal visible={this.props.visible} animationType="slide" transparent={true} onRequestClose={this.props.onClose}>
         <View style={styles.modalOverlay}>
@@ -30,18 +48,12 @@ export default class AddListModal extends Component {
               style={styles.input} 
               placeholder="e.g. Work, Errands..."
               value={this.state.listName}
-              onChangeText={(text) => this.setState({ listName: text })}
+              onChangeText={(text) => { this.setState({ listName: text }); }}
             />
 
             <Text style={styles.label}>Pick a Color</Text>
             <View style={styles.colorPalette}>
-              {COLORS.map(color => (
-                <TouchableOpacity 
-                  key={color} 
-                  style={[styles.colorCircle, { backgroundColor: color }, this.state.selectedColor === color && styles.selectedColor]} 
-                  onPress={() => this.setState({ selectedColor: color })}
-                />
-              ))}
+              {renderedColors}
             </View>
 
             <View style={styles.buttonRow}>
