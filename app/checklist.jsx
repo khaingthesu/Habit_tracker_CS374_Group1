@@ -7,6 +7,9 @@ import DeleteTaskModal from '../components/DeleteTaskModal';
 import TaskModal from '../components/TaskModal';
 import Checkbox from 'expo-checkbox'
 
+import { doc, setDoc, getDoc } from "firebase/firestore";
+import { auth, db } from "../firebase";
+
 let deviceHeight = Dimensions.get('window').height;
 let deviceWidth = Dimensions.get('window').width;
 
@@ -23,8 +26,21 @@ export default class checklist extends Component{
     selectedTaskToView: null,
   }
 
+  saveListsToFirebase = async (lists) => {
+    const uid = auth.currentUser?.uid;
+    if (!uid) return;
+
+    try {
+      await setDoc(doc(db, "users", uid), {
+        lists: lists
+      }, { merge: true });
+    } catch (e) {
+      console.log("Error saving lists:", e);
+    }
+  };
+
   /* Function to add group list */
-  handleAddList = (title, color) => {
+  handleAddList = async (title, color) => {
     let newList = {
       id: Date.now().toString(),
       title: title,
@@ -32,20 +48,18 @@ export default class checklist extends Component{
       tasks: []
     };
     
-    let newListsArray = [];
-    for (let i = 0; i < this.state.lists.length; i++) {
-        newListsArray.push(this.state.lists[i]);
-    }
-    newListsArray.push(newList);
+    const newLists = [...this.state.lists,newList];
 
     this.setState({
-      lists: newListsArray,
+      lists: newLists,
       addModalVisible: false
     });
+
+    await this.saveListsToFirebase(newLists);
   }
 
   /* Function to delete group list */
-  handleDeleteLists = (idsToDelete) => {
+  handleDeleteLists = async (idsToDelete) => {
     let newLists = [];
     for (let i = 0; i < this.state.lists.length; i++) {
         let currentList = this.state.lists[i];
@@ -64,48 +78,41 @@ export default class checklist extends Component{
       lists: newLists,
       deleteModalVisible: false
     });
+
+    await this.saveListsToFirebase(newLists);
   }
 
-  handleAddTask = (listId, taskData) => {
-    let newLists = [];
-    for (let i = 0; i < this.state.lists.length; i++) {
-      let currentList = this.state.lists[i];
-      if (currentList.id === listId) {
-        let newTasks = [];
-        for (let j = 0; j < currentList.tasks.length; j++) {
-            newTasks.push(currentList.tasks[j]);
-        }
-        
-        let newTaskDataObj = {
-            id: Date.now().toString(),
-            text: taskData.taskName,
-            notes: taskData.notes,
-            dueTime: taskData.dueTime,
-            dueDate: taskData.dueDate,
-            checked: false
-        };
-        newTasks.push(newTaskDataObj);
-        
-        let updatedList = {
-            id: currentList.id,
-            title: currentList.title,
-            color: currentList.color,
-            tasks: newTasks
-        };
-        newLists.push(updatedList);
-      } else {
-        newLists.push(currentList);
+  handleAddTask = async (listId, taskData) => {
+    const newLists = this.state.lists.map(list => {
+      if (list.id !== listId) {
+        return list;
       }
-    }
-    
+
+      const newTask = {
+        id: Date.now().toString(),
+        text: taskData.taskName,
+        notes: taskData.notes,
+        dueTime: taskData.dueTime,
+        dueDate: taskData.dueDate,
+        checked: false
+      }
+
+      return {
+        ...list,
+        tasks: [...list.tasks,newTask]
+      }
+    })
+        
     this.setState({
       lists: newLists,
       addTaskModalVisible: false,
       activeListId: null
     });
+
+    await this.saveListsToFirebase(newLists);
   }
 
-  handleDeleteTasks = (listId, taskIdsToDelete) => {
+  handleDeleteTasks = async (listId, taskIdsToDelete) => {
     let newLists = [];
     for (let i = 0; i < this.state.lists.length; i++) {
       let currentList = this.state.lists[i];
@@ -140,57 +147,57 @@ export default class checklist extends Component{
       deleteTaskModalVisible: false,
       activeListId: null
     });
+
+    await this.saveListsToFirebase(newLists);
   }
 
   /* toggle task check */
-  toggleTaskCheck = (listId, taskId) => {
-    let newLists = [];
-    for (let i = 0; i < this.state.lists.length; i++) {
-      let currentList = this.state.lists[i];
-      if (currentList.id === listId) {
-        let toggledTasks = [];
-        for (let j = 0; j < currentList.tasks.length; j++) {
-            let currentTask = currentList.tasks[j];
-            if (currentTask.id === taskId) {
-                let toggledTask = {
-                    id: currentTask.id,
-                    text: currentTask.text,
-                    notes: currentTask.notes,
-                    dueTime: currentTask.dueTime,
-                    dueDate: currentTask.dueDate,
-                    checked: !currentTask.checked
-                };
-                toggledTasks.push(toggledTask);
-            } else {
-                toggledTasks.push(currentTask);
-            }
-        }
-        let updatedList = {
-            id: currentList.id,
-            title: currentList.title,
-            color: currentList.color,
-            tasks: toggledTasks
-        };
-        newLists.push(updatedList);
-      } else {
-        newLists.push(currentList);
+  toggleTaskCheck = async (listId, taskId) => {
+    const newLists = this.state.lists.map(list => {
+      if (list.id !== listId) {
+        return list
       }
-    }
+
+      return {
+        ...list,
+        tasks: list.tasks?.map(task =>
+          task.id === taskId
+            ? {...task,checked: !task.checked}
+            : task
+        )
+      }
+    });
+    
     this.setState({ lists: newLists });
+
+    await this.saveListsToFirebase(newLists);
+  }
+
+  async componentDidMount() {
+    const uid = auth.currentUser?.uid;
+    if (!uid) return;
+
+    try {
+      const docRef = doc(db, "users", uid);
+      const docSnap = await getDoc(docRef);
+
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        if (data.lists) {
+          this.setState({ lists: data.lists });
+        }
+      }
+    } catch (e) {
+      console.log("Error loading lists:", e);
+    }
   }
 
   render() {
-    let activeTasks = [];
-    if (this.state.activeListId !== null) {
-      for (let i = 0; i < this.state.lists.length; i++) {
-        let currentList = this.state.lists[i];
-        if (currentList.id === this.state.activeListId) {
-          if (currentList.tasks) {
-            activeTasks = currentList.tasks;
-          }
-        }
-      }
-    }
+    const activeList = this.state.lists.find(
+      list => list.id === this.state.activeListId
+    )
+
+    const activeTasks = activeList?.tasks || []
 
     return(
     <View style={styles.container}>
@@ -256,7 +263,7 @@ export default class checklist extends Component{
                 </View>
 
                 <View style={styles.listTasks}>
-                  {list.tasks.map(task => {
+                  {list.tasks?.map(task => {
                     return (
                       <View key={task.id} style={styles.task}>
                         <Checkbox 
