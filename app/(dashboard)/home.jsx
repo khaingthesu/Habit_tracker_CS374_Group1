@@ -10,6 +10,7 @@ const Home = () => {
   /* use the set functions later when changing */
   /* gotta use useState instead of state = {}, since not class component like codehs, but a function component like the vid examples */
   const [date, setDate] = useState("3/2/26");
+  taskd
   const [completed, setCompleted] = useState(0);
   const [total, setTotal] = useState(5);
   const [task1, setTask1] = useState(false);
@@ -45,7 +46,7 @@ const Home = () => {
 
         <View style={styles.taskContainer}>
           <Text style={styles.taskTitle}>Today's Tasks:</Text> {/* somehow dynamically change later, idk how though */}
-          <Scrollbar style={styles.tscroll}>
+          < ScrollView style={styles.tscroll}>
           <View style={styles.fullTask}>
             <Checkbox value={task1} onValueChange={value => {setTask1(value);}}/>
             <Text style={styles.task}>Task 1</Text>
@@ -66,7 +67,7 @@ const Home = () => {
             <Checkbox value={task5} onValueChange={value => {setTask5(value);}}/>
             <Text style={styles.task}>Task 5</Text>
           </View>
-          </Scrollbar>
+          </ ScrollView>
           </View>
         
         </View>
