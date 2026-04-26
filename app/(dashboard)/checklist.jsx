@@ -1,14 +1,14 @@
 import { StyleSheet, Text, View, Dimensions, TouchableHighlight, TouchableOpacity, Image, ScrollView } from 'react-native'
 import React, { Component } from 'react';  
-import AddListModal from '../components/AddListModal';
-import DeleteListModal from '../components/DeleteListModal';
-import AddTaskModal from '../components/AddTaskModal';
-import DeleteTaskModal from '../components/DeleteTaskModal';
-import TaskModal from '../components/TaskModal';
+import AddListModal from '../../components/AddListModal';
+import DeleteListModal from '../../components/DeleteListModal';
+import AddTaskModal from '../../components/AddTaskModal';
+import DeleteTaskModal from '../../components/DeleteTaskModal';
+import TaskModal from '../../components/TaskModal';
 import Checkbox from 'expo-checkbox'
 
 import { doc, setDoc, getDoc } from "firebase/firestore";
-import { auth, db } from "../firebase";
+import { auth, db } from "../../firebase";
 
 let deviceHeight = Dimensions.get('window').height;
 let deviceWidth = Dimensions.get('window').width;
@@ -218,6 +218,10 @@ export default class checklist extends Component{
           <Text style={styles.titleText}>
             All Tasks
           </Text>
+            <view style={styles.vspacers}></view>
+<view style={styles.spacers}></view>
+<view style={styles.vspacersr}></view>  
+<view style={styles.spacersr}></view>
         </View>
 
         <View style={styles.buttons}>
@@ -265,19 +269,18 @@ export default class checklist extends Component{
                 <View style={styles.listTasks}>
                   {list.tasks?.map(task => {
                     return (
-                      <View key={task.id} style={styles.task}>
-                        <Checkbox 
+                        <><view style={styles.vspacers}></view><view style={styles.spacers}></view><view style={styles.vspacersr}></view><view style={styles.spacersr}></view><View key={task.id} style={styles.task}>
+                        <Checkbox
                           style={styles.checkbox}
                           value={task.checked}
-                          onValueChange={() => { this.toggleTaskCheck(list.id, task.id); }}
-                        />
-                        <TouchableOpacity 
+                          onValueChange={() => { this.toggleTaskCheck(list.id, task.id); } } />
+                        <TouchableOpacity
                           style={styles.taskTouchable}
-                          onPress={() => { this.setState({ taskViewModalVisible: true, selectedTaskToView: task }); }}
+                          onPress={() => { this.setState({ taskViewModalVisible: true, selectedTaskToView: task }); } }
                         >
                           <Text style={styles.taskText}>{task.text}</Text>
                         </TouchableOpacity>
-                      </View>
+                      </View></>
                     );
                   })}
                 </View>
@@ -339,6 +342,36 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
+ 
+ 
+  vspacers:{
+width: deviceWidth/300,
+height: deviceHeight/20,
+backgroundColor: 'blue',
+right: deviceWidth/3,
+
+
+  },
+    vspacersr:{
+width: deviceWidth/300,
+height: deviceHeight/40,
+backgroundColor: 'red',
+right: deviceWidth/3,
+
+
+  },
+   spacersr:{
+width: deviceWidth,
+height: deviceWidth/300,
+backgroundColor: 'red',
+marginBottom:deviceHeight/100,
+  },
+  spacers:{
+width: deviceWidth,
+height: deviceWidth/300,
+backgroundColor: 'blue',
+marginBottom:deviceHeight/100,
+  },
   titleP: {
     fontWeight: 'bold',
     fontSize: deviceHeight / 30,
@@ -356,7 +389,7 @@ const styles = StyleSheet.create({
   //Body elements
   body: {
     flex: 10,
-    backgroundColor: '#E6E6FA',
+    backgroundColor: '#fef2bf',
     alignItems: 'center',
   },
 
@@ -393,21 +426,17 @@ const styles = StyleSheet.create({
   },
 
 //Task boxes
-  listsScrollContainer: {
-    width: '100%',
-    flex: 1,
-  },
-  
-  boxConfig:{
-    minHeight: deviceHeight/4,
+  box1:{
+    height: deviceHeight/4,
     width: deviceWidth/1.5,
 
     borderWidth: 3,
+    borderColor: 'red',
     marginBottom: 30,
-    overflow: 'hidden',
   },
 
-  boxTitleConfig:{
+  box1Title:{
+    backgroundColor:'red',
     padding: 15,
     flexDirection: 'row',
     alignItems: 'center',
@@ -417,31 +446,47 @@ const styles = StyleSheet.create({
     fontSize: 20,
     color: 'white',
     fontWeight: 'bold',
-    flex: 1,
   },
 
-  listIconsContainer: {
-    flexDirection: 'row',
-    marginLeft: 10,
-    alignItems: 'center',
-  },
-  
-  listIconAction: {
-    marginLeft: 15,
+  taskInput:{
+    width:150,
+    height: 50,
+    backgroundColor:'white',
+
+    borderWidth: 2.2,
+    borderRadius: 20,
+
+    padding: 10,
+    marginLeft: 18,
   },
 
-  boxImageSmall: {
-    height: 32,
-    width: 32,
-    borderRadius: 16,
+  boxImage:{
+    height: 35,
+    width: 35,
+
+    borderRadius:40,
     borderWidth: 1.5,
+
+    marginLeft: 5,
+    marginRight: 10,
+  },
+
+  box2:{
+    height: deviceHeight/4,
+    width: deviceWidth/1.5,
+
+    borderWidth: 3,
+    borderColor: 'green',
+  },
+
+  box2Title:{
+    backgroundColor:'green',
+    padding: 15,
+    flexDirection: 'row',
+    alignItems: 'center',
   },
 
   //Boxes list of tasks
-  listTasks: {
-    paddingBottom: 15,
-  },
-
   task:{
     marginLeft: 15,
     marginTop: 10,
@@ -457,14 +502,5 @@ const styles = StyleSheet.create({
 
   taskText:{
     fontSize: 18,
-  },
-
-  taskTouchable: {
-    borderWidth: 1,
-    borderColor: '#999',
-    borderRadius: 5,
-    paddingVertical: 4,
-    paddingHorizontal: 12,
-    backgroundColor: 'rgba(255, 255, 255, 0.6)',
   },
 });

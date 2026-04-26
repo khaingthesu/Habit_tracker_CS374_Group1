@@ -10,7 +10,7 @@ import {
 import { Calendar } from "react-native-calendars";
 
 let deviceHeight = Dimensions.get("window").height;
-
+let deviceWidth = Dimensions.get('window').width;
 export default function CalendarPage() {
   const [markedDates, setMarkedDates] = useState({});
 
@@ -67,7 +67,7 @@ export default function CalendarPage() {
 }
 
 const styles = StyleSheet.create({
-  container: {
+   container: {
     flex: 1,
   },
 
@@ -93,10 +93,11 @@ const styles = StyleSheet.create({
   },
 
   body: {
+    
     flex: 10,
-    backgroundColor: "#E6E6FA",
-    paddingHorizontal: 15,
-    paddingTop: 20,
+    backgroundColor: "#fef2bf",
+    paddingHorizontal: deviceHeight/50,
+    paddingTop: deviceHeight/10,
   },
 
   calendarBox: {
@@ -106,10 +107,17 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: "black",
   },
-
+btext:{
+      alignItems: "center",
+},
   note: {
-    marginTop: 15,
+   
     textAlign: "center",
-    fontSize: 14,
+marginLeft: deviceWidth/2.5,
+    backgroundColor: '#fef2bf',
+     fontSize: deviceHeight /70,
+    width: deviceHeight / 6,
+    margin: deviceHeight/100,
+    borderBottomWidth: deviceHeight / 200,   
   },
 });
