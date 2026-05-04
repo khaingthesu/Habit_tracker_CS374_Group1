@@ -3,6 +3,9 @@ import React, { Component } from 'react'
 import Checkbox from 'expo-checkbox' /* use the command npx expo install expo-checkbox */
 import { Link } from 'expo-router'; /* for temp link to checklist */
 
+import { doc, getDoc } from 'firebase/firestore'
+import { auth, db } from '../firebase'
+
 let deviceHeight = Dimensions.get('window').height;
 let deviceWidth = Dimensions.get('window').width;
 
