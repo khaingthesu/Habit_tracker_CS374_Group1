@@ -1,76 +1,81 @@
 import { StyleSheet, Text, View, Dimensions, TouchableHighlight, Image } from 'react-native'
-import React, { useState } from 'react'
+import React, { Component } from 'react'
 import Checkbox from 'expo-checkbox' /* use the command npx expo install expo-checkbox */
 import { Link } from 'expo-router'; /* for temp link to checklist */
 
 let deviceHeight = Dimensions.get('window').height;
 let deviceWidth = Dimensions.get('window').width;
 
-const Home = () => {
-  /* use the set functions later when changing */
-  /* gotta use useState instead of state = {}, since not class component like codehs, but a function component like the vid examples */
-  const [date, setDate] = useState("3/2/26");
-  const [completed, setCompleted] = useState(0);
-  const [total, setTotal] = useState(5);
-  const [task1, setTask1] = useState(false);
-  const [task2, setTask2] = useState(false);
-  const [task3, setTask3] = useState(false);
-  const [task4, setTask4] = useState(false);
-  const [task5, setTask5] = useState(false);
+export default class Home extends Component {
+  state = {
+    date: new Date().toDateString(),
+    total: 5,
+    task1: false,
+    task2: false,
+    task3: false,
+    task4: false,
+    task5: false,
+  }
 
-  return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Habit Tracker</Text> 
-          <TouchableHighlight onPress={() => alert('Logo pressed - redirect somewhere (profile?)')}>
+  render() {
+    const completed =
+    Number(this.state.task1) +
+    Number(this.state.task2) +
+    Number(this.state.task3) +
+    Number(this.state.task4) +
+    Number(this.state.task5);
+    return (
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <Text style={styles.title}>Habit Tracker</Text> 
+            <TouchableHighlight onPress={() => alert('Logo pressed - redirect somewhere (profile?)')}>
+              <Image
+                  source={{ uri: 'https://picsum.photos/id/237/200/300' } /* Replace image with logo later */}
+                  style={styles.logo}
+              />
+            </TouchableHighlight>
+        </View>
+        <View style={styles.body}>
+          <View style={styles.infoContainer}>
+            <Text style={styles.date}>{this.state.date}</Text>
+            <Text style={styles.progress}>Progress: {completed} / {this.state.total}</Text>
+          </View>
+          <View style={styles.mainPicContainer}>
             <Image
-                source={{ uri: 'https://picsum.photos/id/237/200/300' } /* Replace image with logo later */}
-                style={styles.logo}
+                source={{ uri: 'https://picsum.photos/id/1/200/400/?blur' } /* Replace with something related to tracking habits? */}
+                style={styles.mainPic}
             />
-          </TouchableHighlight>
-      </View>
-      <View style={styles.body}>
-        <View style={styles.infoContainer}>
-          <Text style={styles.date}>{date}</Text>
-          <Text style={styles.progress}>Progress: {completed} / {total}</Text>
-        </View>
-        <View style={styles.mainPicContainer}>
-          <Image
-              source={{ uri: 'https://picsum.photos/id/1/200/400/?blur' } /* Replace with something related to tracking habits? */}
-              style={styles.mainPic}
-          />
-        </View>
-        <View style={styles.taskContainer}>
-          <Text style={styles.taskTitle}>Today's Tasks:</Text> {/* somehow dynamically change later, idk how though */}
-          <View style={styles.fullTask}>
-            <Checkbox value={task1} onValueChange={value => {setTask1(value);}}/>
-            <Text style={styles.task}>Task 1</Text>
           </View>
-          <View style={styles.fullTask}>
-            <Checkbox value={task2} onValueChange={value => {setTask2(value);}}/>
-            <Text style={styles.task}>Task 2</Text>
+          <View style={styles.taskContainer}>
+            <Text style={styles.taskTitle}>Today's Tasks:</Text> {/* somehow dynamically change later, idk how though */}
+            <View style={styles.fullTask}>
+              <Checkbox value={this.state.task1} onValueChange={(value) => this.setState({ task1: value })}/>
+              <Text style={styles.task}>Task 1</Text>
+            </View>
+            <View style={styles.fullTask}>
+              <Checkbox value={this.state.task2} onValueChange={(value) => this.setState({ task2: value })}/>
+              <Text style={styles.task}>Task 2</Text>
+            </View>
+            <View style={styles.fullTask}>
+              <Checkbox value={this.state.task3} onValueChange={(value) => this.setState({ task3: value })}/>
+              <Text style={styles.task}>Task 3</Text>
+            </View>
+            <View style={styles.fullTask}>
+              <Checkbox value={this.state.task4} onValueChange={(value) => this.setState({ task4: value })}/>
+              <Text style={styles.task}>Task 4</Text>
+            </View>
+            <View style={styles.fullTask}>
+              <Checkbox value={this.state.task5} onValueChange={(value) => this.setState({ task5: value })}/>
+              <Text style={styles.task}>Task 5</Text>
+            </View>
+            <Link href="/checklist" style={styles.link}>Checklist Page</Link>
+            <Link href="/calendar" style={styles.link}>Calendar Page</Link>
           </View>
-          <View style={styles.fullTask}>
-            <Checkbox value={task3} onValueChange={value => {setTask3(value);}}/>
-            <Text style={styles.task}>Task 3</Text>
-          </View>
-          <View style={styles.fullTask}>
-            <Checkbox value={task4} onValueChange={value => {setTask4(value);}}/>
-            <Text style={styles.task}>Task 4</Text>
-          </View>
-          <View style={styles.fullTask}>
-            <Checkbox value={task5} onValueChange={value => {setTask5(value);}}/>
-            <Text style={styles.task}>Task 5</Text>
-          </View>
-          <Link href="/checklist" style={styles.link}>Checklist Page</Link>
-          <Link href="/calendar" style={styles.link}>Calendar Page</Link>
         </View>
       </View>
-    </View>
-  )
+    )
+  }
 }
-
-export default Home
 
 const styles = StyleSheet.create({
   container: {
@@ -109,7 +114,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   mainPic: {
-    width: 400,
+    width: deviceWidth * 0.9,
     height: 200,
     borderRadius: 5,
     borderWidth: 2,
