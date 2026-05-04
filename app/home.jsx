@@ -12,21 +12,40 @@ let deviceWidth = Dimensions.get('window').width;
 export default class Home extends Component {
   state = {
     date: new Date().toDateString(),
-    total: 5,
     task1: false,
     task2: false,
     task3: false,
     task4: false,
     task5: false,
+    lists: [],
+  }
+
+  async componentDidMount() {
+    const uid = auth.currentUser?.uid
+    if (!uid) {
+      return
+    }
+
+    try {
+      const docRef = doc(db,"users",uid)
+      const docSnap = await getDoc(docRef)
+
+      if (docSnap.exists()) {
+        const data = docSnap.data()
+        if(data.lists) {
+          this.setState({lists: data.lists})
+        }
+      }
+    } catch(error) {
+      console.log("Error:",error)
+    }
   }
 
   render() {
-    const completed =
-    Number(this.state.task1) +
-    Number(this.state.task2) +
-    Number(this.state.task3) +
-    Number(this.state.task4) +
-    Number(this.state.task5);
+    const tasks = this.state.lists.flatMap(list =>  list.tasks || [])
+    const total = tasks.length
+    const completed = tasks.filter(task => task.checked).length
+
     return (
       <View style={styles.container}>
         <View style={styles.header}>
