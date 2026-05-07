@@ -10,6 +10,7 @@ import {
   Modal,
   TextInput,
   Alert,
+  ScrollView,
 } from "react-native";
 import { Calendar } from "react-native-calendars";
 import { doc, setDoc, getDoc } from "firebase/firestore";
@@ -19,15 +20,17 @@ let deviceHeight = Dimensions.get("window").height;
 
 export default function CalendarPage() {
   const [markedDates, setMarkedDates] = useState({});
-  const [modalVisible, setModalVisible] = useState(false);
+  const [addModalVisible, setAddModalVisible] = useState(false);
+  const [dayModalVisible, setDayModalVisible] = useState(false);
   const [selectedDate, setSelectedDate] = useState("");
   const [taskText, setTaskText] = useState("");
+  const [allLists, setAllLists] = useState([]);
 
   useEffect(() => {
-    loadMarkedDates();
+    loadData();
   }, []);
 
-  const loadMarkedDates = async () => {
+  const loadData = async () => {
     const uid = auth.currentUser?.uid;
     if (!uid) return;
 
@@ -37,20 +40,33 @@ export default function CalendarPage() {
       if (docSnap.exists()) {
         const data = docSnap.data();
         const lists = data.lists || [];
-        const calendarList = lists.find((l) => l.id === "calendar-list");
-        if (calendarList) {
-          const dates = {};
-          calendarList.tasks.forEach((task) => {
+        setAllLists(lists);
+
+        const dates = {};
+        lists.forEach((list) => {
+          list.tasks?.forEach((task) => {
             if (task.dueDate) {
               dates[task.dueDate] = { selected: true, selectedColor: "teal" };
             }
           });
-          setMarkedDates(dates);
-        }
+        });
+        setMarkedDates(dates);
       }
     } catch (e) {
-      console.log("Error loading calendar dates:", e);
+      console.log("Error loading data:", e);
     }
+  };
+
+  const getTasksForDate = (date) => {
+    const tasks = [];
+    allLists.forEach((list) => {
+      list.tasks?.forEach((task) => {
+        if (task.dueDate === date) {
+          tasks.push({ ...task, listTitle: list.title, listColor: list.color, listId: list.id });
+        }
+      });
+    });
+    return tasks;
   };
 
   const addTaskToDate = async () => {
@@ -91,6 +107,7 @@ export default function CalendarPage() {
       }
 
       await setDoc(docRef, { lists: existing }, { merge: true });
+      setAllLists(existing);
 
       setMarkedDates((prev) => ({
         ...prev,
@@ -98,18 +115,42 @@ export default function CalendarPage() {
       }));
 
       setTaskText("");
-      setModalVisible(false);
-      Alert.alert("Task added!", `"${newTask.text}" added for ${selectedDate}`);
+      setAddModalVisible(false);
+      setDayModalVisible(true); 
     } catch (e) {
       console.log("Error adding task:", e);
+    }
+  };
+
+  const toggleTaskCheck = async (listId, taskId) => {
+    const newLists = allLists.map((list) => {
+      if (list.id !== listId) return list;
+      return {
+        ...list,
+        tasks: list.tasks?.map((task) =>
+          task.id === taskId ? { ...task, checked: !task.checked } : task
+        ),
+      };
+    });
+
+    setAllLists(newLists);
+
+    const uid = auth.currentUser?.uid;
+    if (!uid) return;
+    try {
+      await setDoc(doc(db, "users", uid), { lists: newLists }, { merge: true });
+    } catch (e) {
+      console.log("Error saving:", e);
     }
   };
 
   function onDayPress(day) {
     const date = day.dateString;
     setSelectedDate(date);
-    setModalVisible(true);
+    setDayModalVisible(true);
   }
+
+  const tasksForSelectedDate = getTasksForDate(selectedDate);
 
   return (
     <View style={styles.container}>
@@ -141,14 +182,82 @@ export default function CalendarPage() {
             }}
           />
         </View>
-        <Text style={styles.note}>Tap a day to add a task.</Text>
+        <Text style={styles.note}>Tap a day to see or add tasks.</Text>
       </View>
 
+      {/* Day View Modal — shows tasks for that day */}
       <Modal
-        visible={modalVisible}
+        visible={dayModalVisible}
         transparent
         animationType="slide"
-        onRequestClose={() => setModalVisible(false)}
+        onRequestClose={() => setDayModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalBox}>
+            <Text style={styles.modalTitle}>📅 {selectedDate}</Text>
+
+            {tasksForSelectedDate.length === 0 ? (
+              <Text style={styles.noTasks}>No tasks for this day.</Text>
+            ) : (
+              <ScrollView style={styles.taskScroll}>
+                {tasksForSelectedDate.map((task) => (
+                  <View key={task.id} style={styles.taskRow}>
+                    <TouchableOpacity
+                      style={[
+                        styles.checkbox,
+                        task.checked && styles.checkboxChecked,
+                        { borderColor: task.listColor },
+                      ]}
+                      onPress={() => toggleTaskCheck(task.listId, task.id)}
+                    >
+                      {task.checked && <Text style={styles.checkmark}>✓</Text>}
+                    </TouchableOpacity>
+                    <View style={styles.taskInfo}>
+                      <Text
+                        style={[
+                          styles.taskText,
+                          task.checked && styles.taskDone,
+                        ]}
+                      >
+                        {task.text}
+                      </Text>
+                      <Text
+                        style={[styles.listLabel, { color: task.listColor }]}
+                      >
+                        {task.listTitle}
+                      </Text>
+                    </View>
+                  </View>
+                ))}
+              </ScrollView>
+            )}
+
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={styles.cancelBtn}
+                onPress={() => setDayModalVisible(false)}
+              >
+                <Text style={styles.cancelText}>Close</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.addBtn}
+                onPress={() => {
+                  setDayModalVisible(false);
+                  setAddModalVisible(true);
+                }}
+              >
+                <Text style={styles.addText}>+ Add Task</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      <Modal
+        visible={addModalVisible}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setAddModalVisible(false)}
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalBox}>
@@ -164,7 +273,7 @@ export default function CalendarPage() {
                 style={styles.cancelBtn}
                 onPress={() => {
                   setTaskText("");
-                  setModalVisible(false);
+                  setAddModalVisible(false);
                 }}
               >
                 <Text style={styles.cancelText}>Cancel</Text>
@@ -181,9 +290,7 @@ export default function CalendarPage() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
+  container: { flex: 1 },
   header: {
     flex: 1.5,
     backgroundColor: "teal",
@@ -231,12 +338,63 @@ const styles = StyleSheet.create({
     width: "85%",
     borderRadius: 12,
     padding: 24,
+    maxHeight: "70%",
   },
   modalTitle: {
     fontSize: 18,
     fontWeight: "bold",
     marginBottom: 16,
     textAlign: "center",
+  },
+  taskScroll: {
+    maxHeight: 250,
+    marginBottom: 16,
+  },
+  taskRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: "#eee",
+  },
+  checkbox: {
+    width: 24,
+    height: 24,
+    borderWidth: 2,
+    borderRadius: 4,
+    marginRight: 12,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  checkboxChecked: {
+    backgroundColor: "teal",
+    borderColor: "teal",
+  },
+  checkmark: {
+    color: "white",
+    fontWeight: "bold",
+    fontSize: 14,
+  },
+  taskInfo: {
+    flex: 1,
+  },
+  taskText: {
+    fontSize: 16,
+  },
+  taskDone: {
+    textDecorationLine: "line-through",
+    color: "#999",
+  },
+  listLabel: {
+    fontSize: 12,
+    marginTop: 2,
+    fontWeight: "600",
+  },
+  noTasks: {
+    textAlign: "center",
+    color: "#888",
+    fontStyle: "italic",
+    marginVertical: 20,
   },
   input: {
     borderWidth: 1,
