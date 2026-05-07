@@ -3,7 +3,7 @@ import React, { Component } from 'react'
 import Checkbox from 'expo-checkbox' /* use the command npx expo install expo-checkbox */
 import { Link } from 'expo-router'; /* for temp link to checklist */
 
-import { doc, getDoc } from 'firebase/firestore'
+import { doc, getDoc, setDoc } from 'firebase/firestore'
 import { auth, db } from '../firebase'
 
 let deviceHeight = Dimensions.get('window').height;
@@ -41,6 +41,30 @@ export default class Home extends Component {
     }
   }
 
+  taskChange = async (taskId) => {
+    const uid = auth.currentUser.uid
+    const updatedLists = this.state.lists.map(list => {
+      const updatedTasks = (list.tasks || []).map(task => {
+        if(task.id == taskId) {
+          return {...task,checked:!task.checked}
+        }
+        return task
+      })
+
+      return {
+        ...list,
+        tasks: updatedTasks
+      }
+    })
+
+    this.setState({lists:updatedLists})
+
+    await setDoc(doc(db,"users",uid), {
+      lists: updatedLists
+    },
+    {merge: true}  
+  )}
+
   render() {
     const tasks = this.state.lists.flatMap(list => list.tasks || [])
     const total = tasks.length
@@ -73,7 +97,7 @@ export default class Home extends Component {
             {
               tasks.map(task => (
                 <View key={task.id} style={styles.fullTask}>
-                  <Checkbox value={task.checked}/>
+                  <Checkbox value={task.checked} onValueChange={() => this.taskChange(task.id)}/>
                   <Text style={styles.task}>{task.text}</Text>
                 </View>
               ))
