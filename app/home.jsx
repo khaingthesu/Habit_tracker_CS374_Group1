@@ -66,7 +66,9 @@ export default class Home extends Component {
   )}
 
   render() {
-    const tasks = this.state.lists.flatMap(list => list.tasks || [])
+    const today = new Date()
+    const todayFormatted = (today.getMonth() + 1) + "/" + today.getDate()
+    const tasks = this.state.lists.flatMap(list => list.tasks || []).filter(task => task.dueDate == todayFormatted)
     const total = tasks.length
     const completed = tasks.filter(task => task.checked).length
 
