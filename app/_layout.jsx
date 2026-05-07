@@ -9,6 +9,7 @@ export default function RootLayout() {
     }}>
 
       {/* Individual Screens */}
+        <Stack.Screen name="(auth)" option= {{headershown: false}}/>
         <Stack.Screen name="index" options={{ title: "Log In/Sign Up " }} />
         <Stack.Screen name="home" options={{ title: "HomePage" }} />
         <Stack.Screen name="checklist" options={{ title: "Checklist"}} />
