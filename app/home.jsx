@@ -3,27 +3,75 @@ import React, { Component } from 'react'
 import Checkbox from 'expo-checkbox' /* use the command npx expo install expo-checkbox */
 import { Link } from 'expo-router'; /* for temp link to checklist */
 
+import { doc, getDoc, setDoc } from 'firebase/firestore'
+import { auth, db } from '../firebase'
+
 let deviceHeight = Dimensions.get('window').height;
 let deviceWidth = Dimensions.get('window').width;
 
 export default class Home extends Component {
   state = {
     date: new Date().toDateString(),
-    total: 5,
     task1: false,
     task2: false,
     task3: false,
     task4: false,
     task5: false,
+    lists: [],
   }
 
+  async componentDidMount() {
+    const uid = auth.currentUser?.uid
+    if (!uid) {
+      return
+    }
+
+    try {
+      const docRef = doc(db,"users",uid)
+      const docSnap = await getDoc(docRef)
+
+      if (docSnap.exists()) {
+        const data = docSnap.data()
+        if(data.lists) {
+          this.setState({lists: data.lists})
+        }
+      }
+    } catch(error) {
+      console.log("Error:",error)
+    }
+  }
+
+  taskChange = async (taskId) => {
+    const uid = auth.currentUser.uid
+    const updatedLists = this.state.lists.map(list => {
+      const updatedTasks = (list.tasks || []).map(task => {
+        if(task.id == taskId) {
+          return {...task,checked:!task.checked}
+        }
+        return task
+      })
+
+      return {
+        ...list,
+        tasks: updatedTasks
+      }
+    })
+
+    this.setState({lists:updatedLists})
+
+    await setDoc(doc(db,"users",uid), {
+      lists: updatedLists
+    },
+    {merge: true}  
+  )}
+
   render() {
-    const completed =
-    Number(this.state.task1) +
-    Number(this.state.task2) +
-    Number(this.state.task3) +
-    Number(this.state.task4) +
-    Number(this.state.task5);
+    const today = new Date()
+    const todayFormatted = (today.getMonth() + 1) + "/" + today.getDate()
+    const tasks = this.state.lists.flatMap(list => list.tasks || []).filter(task => task.dueDate == todayFormatted)
+    const total = tasks.length
+    const completed = tasks.filter(task => task.checked).length
+
     return (
       <View style={styles.container}>
         <View style={styles.header}>
@@ -38,7 +86,7 @@ export default class Home extends Component {
         <View style={styles.body}>
           <View style={styles.infoContainer}>
             <Text style={styles.date}>{this.state.date}</Text>
-            <Text style={styles.progress}>Progress: {completed} / {this.state.total}</Text>
+            <Text style={styles.progress}>Progress: {completed} / {total}</Text>
           </View>
           <View style={styles.mainPicContainer}>
             <Image
@@ -47,27 +95,15 @@ export default class Home extends Component {
             />
           </View>
           <View style={styles.taskContainer}>
-            <Text style={styles.taskTitle}>Today's Tasks:</Text> {/* somehow dynamically change later, idk how though */}
-            <View style={styles.fullTask}>
-              <Checkbox value={this.state.task1} onValueChange={(value) => this.setState({ task1: value })}/>
-              <Text style={styles.task}>Task 1</Text>
-            </View>
-            <View style={styles.fullTask}>
-              <Checkbox value={this.state.task2} onValueChange={(value) => this.setState({ task2: value })}/>
-              <Text style={styles.task}>Task 2</Text>
-            </View>
-            <View style={styles.fullTask}>
-              <Checkbox value={this.state.task3} onValueChange={(value) => this.setState({ task3: value })}/>
-              <Text style={styles.task}>Task 3</Text>
-            </View>
-            <View style={styles.fullTask}>
-              <Checkbox value={this.state.task4} onValueChange={(value) => this.setState({ task4: value })}/>
-              <Text style={styles.task}>Task 4</Text>
-            </View>
-            <View style={styles.fullTask}>
-              <Checkbox value={this.state.task5} onValueChange={(value) => this.setState({ task5: value })}/>
-              <Text style={styles.task}>Task 5</Text>
-            </View>
+            <Text style={styles.taskTitle}>Today's Tasks:</Text> {/* dynamically change tasks, mapping from list that contains firebase info */}
+            {
+              tasks.map(task => (
+                <View key={task.id} style={styles.fullTask}>
+                  <Checkbox value={task.checked} onValueChange={() => this.taskChange(task.id)}/>
+                  <Text style={styles.task}>{task.text}</Text>
+                </View>
+              ))
+            }
             <Link href="/checklist" style={styles.link}>Checklist Page</Link>
             <Link href="/calendar" style={styles.link}>Calendar Page</Link>
           </View>
