@@ -1,81 +1,152 @@
-import { StyleSheet, Text, View, Dimensions, TouchableHighlight, Image } from 'react-native'
-import React, { useState } from 'react'
-import Checkbox from 'expo-checkbox' /* use the command npx expo install expo-checkbox */
-import { Link } from 'expo-router'; /* for temp link to checklist */
+import { StyleSheet, Text, View, Dimensions, TouchableHighlight, Image, ScrollView } from 'react-native'
+import React, { Component } from 'react';
+import Checkbox from 'expo-checkbox';
+import { Link, useFocusEffect } from 'expo-router';
+import { doc, setDoc, getDoc } from "firebase/firestore";
+import { auth, db } from "../firebase";
 
 let deviceHeight = Dimensions.get('window').height;
 let deviceWidth = Dimensions.get('window').width;
 
-const Home = () => {
-  /* use the set functions later when changing */
-  /* gotta use useState instead of state = {}, since not class component like codehs, but a function component like the vid examples */
-  const [date, setDate] = useState("3/2/26");
-  const [completed, setCompleted] = useState(0);
-  const [total, setTotal] = useState(5);
-  const [task1, setTask1] = useState(false);
-  const [task2, setTask2] = useState(false);
-  const [task3, setTask3] = useState(false);
-  const [task4, setTask4] = useState(false);
-  const [task5, setTask5] = useState(false);
-
-  return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Habit Tracker</Text> 
-          <TouchableHighlight onPress={() => alert('Logo pressed - redirect somewhere (profile?)')}>
-            <Image
-                source={{ uri: 'https://picsum.photos/id/237/200/300' } /* Replace image with logo later */}
-                style={styles.logo}
-            />
-          </TouchableHighlight>
-      </View>
-      <View style={styles.body}>
-        <View style={styles.infoContainer}>
-          <Text style={styles.date}>{date}</Text>
-          <Text style={styles.progress}>Progress: {completed} / {total}</Text>
-        </View>
-        <View style={styles.mainPicContainer}>
-          <Image
-              source={{ uri: 'https://picsum.photos/id/1/200/400/?blur' } /* Replace with something related to tracking habits? */}
-              style={styles.mainPic}
-          />
-        </View>
-        <View style={styles.taskContainer}>
-          <Text style={styles.taskTitle}>Today's Tasks:</Text> {/* somehow dynamically change later, idk how though */}
-          <View style={styles.fullTask}>
-            <Checkbox value={task1} onValueChange={value => {setTask1(value);}}/>
-            <Text style={styles.task}>Task 1</Text>
-          </View>
-          <View style={styles.fullTask}>
-            <Checkbox value={task2} onValueChange={value => {setTask2(value);}}/>
-            <Text style={styles.task}>Task 2</Text>
-          </View>
-          <View style={styles.fullTask}>
-            <Checkbox value={task3} onValueChange={value => {setTask3(value);}}/>
-            <Text style={styles.task}>Task 3</Text>
-          </View>
-          <View style={styles.fullTask}>
-            <Checkbox value={task4} onValueChange={value => {setTask4(value);}}/>
-            <Text style={styles.task}>Task 4</Text>
-          </View>
-          <View style={styles.fullTask}>
-            <Checkbox value={task5} onValueChange={value => {setTask5(value);}}/>
-            <Text style={styles.task}>Task 5</Text>
-          </View>
-          <Link href="/checklist" style={styles.link}>Checklist Page</Link>
-          <Link href="/calendar" style={styles.link}>Calendar Page</Link>
-        </View>
-      </View>
-    </View>
-  )
+function withFocusEffect(WrappedComponent) {
+  return function FocusWrapper(props) {
+    const [focusKey, setFocusKey] = React.useState(0);
+    useFocusEffect(
+      React.useCallback(() => {
+        setFocusKey((k) => k + 1);
+      }, [])
+    );
+    return <WrappedComponent {...props} focusKey={focusKey} />;
+  };
 }
 
-export default Home
+class Home extends Component {
+  state = {
+    date: new Date().toDateString(),
+    lists: [],
+  }
+
+  loadLists = async () => {
+    const uid = auth.currentUser?.uid;
+    if (!uid) return;
+
+    try {
+      const docRef = doc(db, "users", uid);
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        if (data.lists) {
+          this.setState({ lists: data.lists });
+        }
+      }
+    } catch (e) {
+      console.log("Error loading lists:", e);
+    }
+  };
+
+  saveListsToFirebase = async (lists) => {
+    const uid = auth.currentUser?.uid;
+    if (!uid) return;
+    try {
+      await setDoc(doc(db, "users", uid), { lists }, { merge: true });
+    } catch (e) {
+      console.log("Error saving:", e);
+    }
+  };
+
+  toggleTaskCheck = async (listId, taskId) => {
+    const newLists = this.state.lists.map(list => {
+      if (list.id !== listId) return list;
+      return {
+        ...list,
+        tasks: list.tasks?.map(task =>
+          task.id === taskId ? { ...task, checked: !task.checked } : task
+        )
+      };
+    });
+    this.setState({ lists: newLists });
+    await this.saveListsToFirebase(newLists);
+  }
+
+  async componentDidMount() {
+    await this.loadLists();
+  }
+
+  async componentDidUpdate(prevProps) {
+    if (prevProps.focusKey !== this.props.focusKey) {
+      await this.loadLists();
+    }
+  }
+
+  render() {
+    const allTasks = this.state.lists.flatMap(list =>
+      (list.tasks || []).map(task => ({ ...task, listId: list.id, listColor: list.color }))
+    );
+
+    const completed = allTasks.filter(t => t.checked).length;
+    const total = allTasks.length;
+
+    return (
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <Text style={styles.title}>Habit Tracker</Text>
+          <TouchableHighlight onPress={() => alert('Logo pressed')}>
+            <Image
+              source={{ uri: 'https://picsum.photos/id/237/200/300' }}
+              style={styles.logo}
+            />
+          </TouchableHighlight>
+        </View>
+
+        <View style={styles.body}>
+          <View style={styles.infoContainer}>
+            <Text style={styles.date}>{this.state.date}</Text>
+            <Text style={styles.progress}>Progress: {completed} / {total}</Text>
+          </View>
+
+          <View style={styles.mainPicContainer}>
+            <Image
+              source={{ uri: 'https://picsum.photos/id/1/200/400/?blur' }}
+              style={styles.mainPic}
+            />
+          </View>
+
+          <View style={styles.taskContainer}>
+            <Text style={styles.taskTitle}>Upcoming Tasks:</Text>
+            <ScrollView>
+              {allTasks.length === 0 ? (
+                <Text style={styles.noTasks}>No tasks yet. Add some in the Checklist!</Text>
+              ) : (
+                allTasks.map(task => (
+                  <View key={task.id} style={styles.fullTask}>
+                    <Checkbox
+                      value={task.checked}
+                      onValueChange={() => this.toggleTaskCheck(task.listId, task.id)}
+                    />
+                    <Text style={[styles.task, task.checked && styles.taskDone]}>
+                      {task.text}
+                    </Text>
+                    {task.dueDate ? (
+                      <Text style={styles.dueDate}>📅 {task.dueDate}</Text>
+                    ) : null}
+                  </View>
+                ))
+              )}
+            </ScrollView>
+
+            <Link href="/checklist" style={styles.link}>Checklist Page</Link>
+            <Link href="/calendar" style={styles.link}>Calendar Page</Link>
+          </View>
+        </View>
+      </View>
+    );
+  }
+}
+
+export default withFocusEffect(Home);
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
+  container: { flex: 1 },
   header: {
     flex: 1.5,
     backgroundColor: 'teal',
@@ -109,7 +180,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   mainPic: {
-    width: 400,
+    width: deviceWidth * 0.9,
     height: 200,
     borderRadius: 5,
     borderWidth: 2,
@@ -141,10 +212,27 @@ const styles = StyleSheet.create({
   },
   fullTask: {
     flexDirection: 'row',
-    marginTop: 20,
+    alignItems: 'center',
+    marginTop: 15,
+    gap: 10,
   },
   task: {
     marginLeft: 10,
+    fontSize: 16,
+  },
+  taskDone: {
+    textDecorationLine: 'line-through',
+    color: '#999',
+  },
+  dueDate: {
+    fontSize: 12,
+    color: '#555',
+    marginLeft: 6,
+  },
+  noTasks: {
+    marginTop: 20,
+    color: '#888',
+    fontStyle: 'italic',
   },
   link: {
     marginTop: 20,
