@@ -160,11 +160,16 @@ export default class checklist extends Component{
 
       return {
         ...list,
-        tasks: list.tasks?.map(task =>
-          task.id === taskId
-            ? {...task,checked: !task.checked}
-            : task
-        )
+        tasks: list.tasks?.map(task => {
+          if(task.id != taskId) {
+            return task
+          }
+
+          return {
+            ...task,
+            checked: !task.checked
+          }
+        })
       }
     });
     
