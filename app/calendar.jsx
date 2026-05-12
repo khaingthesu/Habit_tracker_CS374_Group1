@@ -27,7 +27,10 @@ export default function CalendarPage() {
   const [allLists, setAllLists] = useState([]);
 
   useEffect(() => {
-    loadData();
+    const unsub = auth.onAuthStateChanged((user) => {
+      if (user) loadData();
+    });
+    return () => unsub();
   }, []);
 
   const loadData = async () => {

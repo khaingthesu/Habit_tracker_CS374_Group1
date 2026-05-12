@@ -67,8 +67,20 @@ class Home extends Component {
     await this.saveListsToFirebase(newLists);
   }
 
-  async componentDidMount() {
-    await this.loadLists();
+  componentDidMount() {
+    // We listen for the auth state change because on reload,
+    // auth.currentUser might be null for a few milliseconds.
+    this._unsubscribeAuth = auth.onAuthStateChanged((user) => {
+      if (user) {
+        this.loadLists();
+      }
+    });
+  }
+
+  componentWillUnmount() {
+    if (this._unsubscribeAuth) {
+      this._unsubscribeAuth();
+    }
   }
 
   async componentDidUpdate(prevProps) {
@@ -78,7 +90,10 @@ class Home extends Component {
   }
 
   render() {
-    const todayFormatted = new Date().toISOString().split("T")[0];
+    const now = new Date();
+    const todayFormatted = now.getFullYear() + '-' + 
+      String(now.getMonth() + 1).padStart(2, '0') + '-' + 
+      String(now.getDate()).padStart(2, '0');
 
     const allTasks = this.state.lists.flatMap(list =>
       (list.tasks || []).map(task => ({ ...task, listId: list.id, listColor: list.color }))
