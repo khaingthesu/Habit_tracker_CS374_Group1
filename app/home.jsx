@@ -68,8 +68,6 @@ class Home extends Component {
   }
 
   componentDidMount() {
-    // We listen for the auth state change because on reload,
-    // auth.currentUser might be null for a few milliseconds.
     this._unsubscribeAuth = auth.onAuthStateChanged((user) => {
       if (user) {
         this.loadLists();

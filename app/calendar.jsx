@@ -45,7 +45,6 @@ export default function CalendarPage() {
         const lists = data.lists || [];
         setAllLists(lists);
 
-        // Mark any date that has a task with a dueDate
         const dates = {};
         lists.forEach((list) => {
           list.tasks?.forEach((task) => {
