@@ -13,7 +13,7 @@ export default function RootLayout() {
         <Stack.Screen name="index" options={{ title: "Log In/Sign Up " }} />
         <Stack.Screen name="home" options={{ title: "HomePage" }} />
         <Stack.Screen name="checklist" options={{ title: "Checklist"}} />
-        <Stack.Screen name="calender" options={{ title: "Calendar"}} />
+        <Stack.Screen name="calendar" options={{ title: "Calendar"}} />
 
     </Stack>
   )

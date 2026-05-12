@@ -19,16 +19,14 @@ export default class AddTaskModal extends Component {
     let finalDueDate = '';
     let today = new Date();
 
+    const formatDate = (d) => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    
     if (this.state.dueDateMode === 'today') {
-      let month = today.getMonth() + 1;
-      let day = today.getDate();
-      finalDueDate = month + '/' + day;
+      finalDueDate = formatDate(today);
     } else if (this.state.dueDateMode === 'tomorrow') {
       let tomorrow = new Date(today);
       tomorrow.setDate(tomorrow.getDate() + 1);
-      let month = tomorrow.getMonth() + 1;
-      let day = tomorrow.getDate();
-      finalDueDate = month + '/' + day;
+      finalDueDate = formatDate(tomorrow);
     } else if (this.state.dueDateMode === 'other') {
       finalDueDate = this.state.otherDueDate;
     }
@@ -89,7 +87,7 @@ export default class AddTaskModal extends Component {
         otherDateInput = (
           <TextInput 
             style={[styles.input, { marginTop: 10 }]} 
-            placeholder="mm/dd"
+            placeholder="YYYY-MM-DD"
             value={this.state.otherDueDate}
             onChangeText={(text) => { this.setState({ otherDueDate: text }); }}
           />

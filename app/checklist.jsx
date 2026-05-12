@@ -6,15 +6,28 @@ import AddTaskModal from '../components/AddTaskModal';
 import DeleteTaskModal from '../components/DeleteTaskModal';
 import TaskModal from '../components/TaskModal';
 import Checkbox from 'expo-checkbox'
+import { useFocusEffect } from 'expo-router';
 
 import { doc, setDoc, getDoc } from "firebase/firestore";
 import { auth, db } from "../firebase";
+
+function withFocusEffect(WrappedComponent) {
+  return function FocusWrapper(props) {
+    const [focusKey, setFocusKey] = React.useState(0);
+    useFocusEffect(
+      React.useCallback(() => {
+        setFocusKey((k) => k + 1);
+      }, [])
+    );
+    return <WrappedComponent {...props} focusKey={focusKey} />;
+  };
+}
 
 let deviceHeight = Dimensions.get('window').height;
 let deviceWidth = Dimensions.get('window').width;
 
 /* Task Group List */
-export default class checklist extends Component{
+class checklist extends Component{
   state = {
     lists: [],
     addModalVisible: false,
@@ -178,14 +191,12 @@ export default class checklist extends Component{
     await this.saveListsToFirebase(newLists);
   }
 
-  async componentDidMount() {
+  loadLists = async () => {
     const uid = auth.currentUser?.uid;
     if (!uid) return;
-
     try {
       const docRef = doc(db, "users", uid);
       const docSnap = await getDoc(docRef);
-
       if (docSnap.exists()) {
         const data = docSnap.data();
         if (data.lists) {
@@ -194,6 +205,26 @@ export default class checklist extends Component{
       }
     } catch (e) {
       console.log("Error loading lists:", e);
+    }
+  };
+
+  componentDidMount() {
+    this._unsubscribeAuth = auth.onAuthStateChanged((user) => {
+      if (user) {
+        this.loadLists();
+      }
+    });
+  }
+
+  componentWillUnmount() {
+    if (this._unsubscribeAuth) {
+      this._unsubscribeAuth();
+    }
+  }
+
+  async componentDidUpdate(prevProps) {
+    if (prevProps.focusKey !== this.props.focusKey) {
+      await this.loadLists();
     }
   }
 
@@ -330,6 +361,8 @@ export default class checklist extends Component{
     );
   }
 }
+
+export default withFocusEffect(checklist);
 
 const styles = StyleSheet.create({
   container: {

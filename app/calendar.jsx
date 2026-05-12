@@ -27,7 +27,10 @@ export default function CalendarPage() {
   const [allLists, setAllLists] = useState([]);
 
   useEffect(() => {
-    loadData();
+    const unsub = auth.onAuthStateChanged((user) => {
+      if (user) loadData();
+    });
+    return () => unsub();
   }, []);
 
   const loadData = async () => {
@@ -42,7 +45,6 @@ export default function CalendarPage() {
         const lists = data.lists || [];
         setAllLists(lists);
 
-        // Mark any date that has a task with a dueDate
         const dates = {};
         lists.forEach((list) => {
           list.tasks?.forEach((task) => {
